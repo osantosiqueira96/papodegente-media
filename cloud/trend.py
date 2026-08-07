@@ -4,7 +4,7 @@ trend-scout — pauta do dia (POP: pop/POP-trend-scout.md)
 Fontes: Google Trends BR (RSS) + G1 Economia (RSS). Gera cloud/pauta.md;
 o workflow abre a issue (-> e-mail). Sem API paga, so stdlib.
 """
-import urllib.request, xml.etree.ElementTree as ET, re, unicodedata
+import os, urllib.request, xml.etree.ElementTree as ET, re, unicodedata
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -67,6 +67,13 @@ def main():
     L.append("- Formato vencedor: curiosidade IA/tech amarrada no bolso (140 de alcance = 35× média)")
     L.append("- Estrutura: Gancho(3s) → Valor(1 ideia) → CTA 'salva e segue @papodegentebr'")
 
+    try:
+        rad = os.path.join(os.path.dirname(os.path.abspath(__file__)), "radar.md")
+        if os.path.exists(rad):
+            L.append("")
+            L.append(open(rad, encoding="utf-8-sig").read())
+    except Exception as e:
+        print("radar nao incluido:", e)
     open("cloud/pauta.md", "w", encoding="utf-8").write("\n".join(L))
     print(f"pauta gerada: {len(quentes)} match(es) de nicho, {len(trends)} trends, {len(g1)} manchetes")
 
