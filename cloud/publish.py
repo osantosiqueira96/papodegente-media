@@ -131,9 +131,29 @@ def threads_mirror(folder, typ):
         print(f"    THREADS falhou (IG nao afetado): {e}")
         return None
 
+def checar_cota():
+    """Le a cota de publicacao da Meta (24h) e grava cloud/limits.json. Retorna (usados, total)."""
+    try:
+        d = api_get(f"{IG}/content_publishing_limit",
+                    {"fields": "quota_usage,config"}).get("data", [{}])[0]
+        usados = int(d.get("quota_usage", 0))
+        total = int((d.get("config") or {}).get("quota_total", 100))
+        json.dump({"meta_publicacoes": {"usados": usados, "total": total},
+                   "quando": datetime.now(TZ).strftime("%Y-%m-%d %H:%M")},
+                  open(os.path.join(ROOT, "limits.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print(f"cota de publicacao: {usados}/{total}")
+        return usados, total
+    except Exception as e:
+        print("nao consegui ler a cota:", str(e)[:120])
+        return 0, 100
+
 def main():
     if not os.path.exists(QUEUE):
         print("sem queue.json — nada a fazer")
+        return
+    usados, total = checar_cota()
+    if usados >= total - 5:
+        print(f"FREIO: cota de publicacao quase no teto ({usados}/{total}) — nada sera publicado neste ciclo")
         return
     q = json.load(open(QUEUE, encoding="utf-8-sig"))
     now = datetime.now(TZ)
