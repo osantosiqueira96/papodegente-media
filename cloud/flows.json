@@ -2,7 +2,7 @@
     "_ajuda":  "SEUS FLUXOS DO COMMENT-BOT. Cada fluxo: gatilho (palavras), match (\u0027contains\u0027 = contem a palavra | \u0027exact\u0027 = comentario exato), responder_comentario (resposta publica) e dm (mensagem privada). ativo=false desliga. Edite aqui ou peca no chat: \u0027cria um fluxo X\u0027.",
     "config":  {
                    "ignorar_usuarios":  [
-                                            "papodegentebr"
+
                                         ],
                    "max_acoes_por_ciclo":  20
                },
@@ -29,6 +29,16 @@
                                   ],
                       "match":  "contains",
                       "responder_comentario":  "Boa pergunta! 💜 Vamos responder num próximo post — ativa as notificações pra não perder!",
+                      "dm":  ""
+                  },
+                  {
+                      "id":  "ping-teste",
+                      "ativo":  true,
+                      "gatilho":  [
+                                      "ping"
+                                  ],
+                      "match":  "contains",
+                      "responder_comentario":  "PONG! Robô funcionando ✅ (teste)",
                       "dm":  ""
                   }
               ],
