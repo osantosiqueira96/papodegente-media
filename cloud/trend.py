@@ -67,6 +67,33 @@ def main():
     L.append("- Formato vencedor: curiosidade IA/tech amarrada no bolso (140 de alcance = 35× média)")
     L.append("- Estrutura: Gancho(3s) → Valor(1 ideia) → CTA 'salva e segue @papodegentebr'")
 
+    # ---- Roteiro do dia do Professor PG (formato personagem IA) ----
+    tema = quentes[0] if quentes else "as tarifas escondidas que comem seu salário"
+    BLOCO = ("Uma capivara antropomórfica professora de finanças, estilo Pixar 3D, pelagem marrom-avermelhada, "
+             "óculos redondos dourados, colete marrom, gravata roxa com cifrões, em sala de aula com lousa escura "
+             "cheia de anotações de dinheiro em giz colorido, iluminação de estúdio quente. "
+             "FORMATO OBRIGATÓRIO: vídeo VERTICAL 9:16 (celular), personagem centralizado. "
+             "LEGENDAS: as frases faladas aparecem como legenda grande em português do Brasil, letras brancas com "
+             "contorno preto, no TERÇO CENTRAL da tela, estilo reel viral.")
+    cenas = [
+        ("Ela arregala os olhos em choque cômico segurando um jornal.",
+         f"Você viu isso?! {tema}... e ninguém te explica o que muda no SEU bolso!"),
+        ("Ela levanta o dedo como professora e bate a ponteira na lousa.",
+         "Calma. O Professor PG explica: o que importa é quanto sai do seu salário no fim do mês."),
+        ("Ela mostra uma calculadora para a câmera com expressão de segredo revelado.",
+         "Faz a conta comigo: anota o gasto, corta um exagero e guarda a diferença. Todo mês."),
+        ("Ela cruza os braços, pisca e faz joinha para a câmera.",
+         "Simples assim. A capivara aprova! Segue o papo de gente pra mais aulas!"),
+    ]
+    L += ["", "## 🦫 Roteiro do dia — Professor PG (cola no Gemini, 1 por vez)", f"**Tema:** {tema}", ""]
+    for i, (acao, fala) in enumerate(cenas, 1):
+        extra = ' No final aparece na tela em letras grandes douradas: "SEGUE @papodegentebr".' if i == 4 else ""
+        L.append(f"**Prompt {i}:**")
+        L.append("```")
+        L.append(f'{BLOCO} {acao} Ela fala em português brasileiro: "{fala}". 8 segundos.{extra}')
+        L.append("```")
+    L.append("**Depois:** salve como 01.mp4...04.mp4 em `Identidade Visual\\Mascote PG\\videos\\inbox` — o PG-Builder monta, agenda e publica sozinho.")
+
     try:
         rad = os.path.join(os.path.dirname(os.path.abspath(__file__)), "radar.md")
         if os.path.exists(rad):
