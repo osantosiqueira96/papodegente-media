@@ -1,0 +1,25 @@
+{
+ "_ajuda": "SEUS FLUXOS DO COMMENT-BOT. Cada fluxo: gatilho (palavras), match ('contains' = contem a palavra | 'exact' = comentario exato), responder_comentario (resposta publica) e dm (mensagem privada). ativo=false desliga. Edite aqui ou peca no chat: 'cria um fluxo X'.",
+ "config": {
+  "ignorar_usuarios": ["papodegentebr"],
+  "max_acoes_por_ciclo": 20
+ },
+ "flows": [
+  {
+   "id": "eu-quero",
+   "ativo": true,
+   "gatilho": ["eu quero", "euquero", "quero!", "eu-quero"],
+   "match": "contains",
+   "responder_comentario": "Te chamei no privado! 💜 Confere a DM 📩",
+   "dm": "Oi! Aqui é o papo de gente 💜 Vi seu comentário no post. Em breve vou te mandar por aqui o material que prometemos — enquanto isso, me conta: qual é a sua maior dor com dinheiro hoje?"
+  },
+  {
+   "id": "duvida-generica",
+   "ativo": false,
+   "gatilho": ["como", "?"],
+   "match": "contains",
+   "responder_comentario": "Boa pergunta! 💜 Vamos responder num próximo post — ativa as notificações pra não perder!",
+   "dm": ""
+  }
+ ]
+}
