@@ -1,0 +1,14 @@
+{
+  "name": "PG Central — @papodegentebr",
+  "short_name": "PG Central",
+  "description": "Central de comando da operação papo de gente",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#150925",
+  "theme_color": "#150925",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
