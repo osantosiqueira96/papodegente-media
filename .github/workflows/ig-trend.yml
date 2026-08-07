@@ -40,7 +40,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue create --repo "${{ github.repository }}" \
+          echo "" >> cloud/pauta.md
+          echo "cc @osantosiqueira96" >> cloud/pauta.md
+          gh issue create --assignee "osantosiqueira96" --repo "${{ github.repository }}" \
             --title "🗞️ Pauta do dia — $(TZ=America/Sao_Paulo date +%d/%m/%Y)" \
             --body-file cloud/pauta.md
       - name: Andon — alerta de falha
@@ -48,6 +50,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue create --repo "${{ github.repository }}" \
+          gh issue create --assignee "osantosiqueira96" --repo "${{ github.repository }}" \
             --title "🚨 ANDON trend-scout falhou — $(TZ=America/Sao_Paulo date '+%d/%m %H:%M')" \
             --body "Ver logs da execução ${{ github.run_id }}."
