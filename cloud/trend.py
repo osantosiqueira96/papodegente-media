@@ -42,7 +42,14 @@ def main():
     nicho_norm = [norm(k) for k in NICHO]
     def eh_nicho(t):
         tn = norm(t)
-        return any(k in tn for k in nicho_norm)
+        for k in nicho_norm:
+            if len(k) <= 3:
+                # palavras curtas (ex: 'ia') so casam inteiras — evita 'ia' dentro de 'dias'
+                if re.search(r"\b" + re.escape(k) + r"\b", tn):
+                    return True
+            elif k in tn:
+                return True
+        return False
 
     quentes = [t for t in trends + g1 if eh_nicho(t)]
     vistos = set(); quentes = [t for t in quentes if not (norm(t) in vistos or vistos.add(norm(t)))]
