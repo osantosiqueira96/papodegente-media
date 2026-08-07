@@ -52,7 +52,7 @@ jobs:
           if [ "${{ steps.bot.outcome }}" = "failure" ] || [ -f cloud/_alert.txt ]; then
             DET="bot falhou"
             [ -f cloud/_alert.txt ] && DET=$(tr '\n' ' | ' < cloud/_alert.txt)
-            gh issue create --repo "${{ github.repository }}" \
+            gh issue create --assignee "osantosiqueira96" --repo "${{ github.repository }}" \
               --title "🔴 ANDON: comment-bot com erro" \
               --body "Detalhe: $DET — Log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           else
