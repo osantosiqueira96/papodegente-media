@@ -89,6 +89,7 @@ def main():
     q = json.load(open(QUEUE, encoding="utf-8-sig"))
     now = datetime.now(TZ)
     changed = False
+    errs = []
     for item in q:
         if item.get("status") != "pending":
             continue
@@ -107,6 +108,7 @@ def main():
         except Exception as e:
             item["status"] = "error"
             item["note"] = str(e)[:200]
+            errs.append(f"{name} ({item['when']}): {str(e)[:160]}")
             print(f"    ERRO: {e}")
         changed = True
     if changed:
@@ -114,6 +116,9 @@ def main():
         print("queue.json atualizado")
     else:
         print("nada vencido; nada a publicar")
+    if errs:
+        # ANDON: arquivo-sinal (efêmero, só existe no runner) — o workflow abre o alerta
+        open(os.path.join(ROOT, "_alert.txt"), "w", encoding="utf-8").write("\n".join(errs))
 
 if __name__ == "__main__":
     main()
