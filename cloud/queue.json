@@ -88,5 +88,17 @@
   "type": "reel",
   "when": "2026-08-12 12:00",
   "status": "pending"
+ },
+ {
+  "name": "Estatico-04---Cesta-de-Servicos",
+  "type": "photo",
+  "when": "2026-08-14 12:00",
+  "status": "pending"
+ },
+ {
+  "name": "Estatico-05---Poupanca-vs-Tesouro",
+  "type": "photo",
+  "when": "2026-08-15 12:00",
+  "status": "pending"
  }
 ]
