@@ -169,17 +169,18 @@ const TRIG={
  trend:{path:"cloud/trend_nudge.txt",label:"gerar a pauta agora"},
  analyst:{path:"cloud/analyst_nudge.txt",label:"rodar a analise agora"},
  story:{path:"cloud/story_nudge.txt",label:"postar o story de hoje agora"},
- comment:{recommit:"cloud/flows.json",label:"varrer comentarios agora"}
+ comment:{recommit:"cloud/flows.json",label:"varrer comentarios agora"},
+ leadcrm:{recommit:"cloud/flows.json",wf:"ig-comment.yml",label:"varrer e registrar leads agora"},
+ refresh:{path:"cloud/refresh_nudge.txt",label:"renovar o token agora"},
+ factory:{path:"factory/nudge.txt",label:"processar as specs pendentes agora"},
+ radar:{path:"cloud/competitor_nudge.txt",label:"espiar os perfis do radar agora"},
+ planilha:{local:"planilha",label:"atualizar a planilha agora"},
+ nudger:{local:"nudger",label:"checar a fila e cutucar agora"},
+ pgbuilder:{local:"pg-builder",label:"montar o reel da inbox agora"}
 };
 const NOTRIG={
- planilha:"roda no seu PC (8h50 ou ao ligar) - nao dispara pela web",
- nudger:"roda no seu PC a cada 20 min - nao dispara pela web",
- pgbuilder:"roda no seu PC a cada 30 min - jogue clipes na inbox que ele age",
- dashboard:"rotina do claude.ai (8h34) - dispara pelas Rotinas do Claude",
- refresh:"renovacao automatica a cada 20 dias - sem disparo manual",
- factory:"dispara sozinho ao receber uma spec nova no repositorio",
- threads:"dormente - aguardando a chave do Threads",
- radar:"dormente - aguardando o token FB"
+ dashboard:"a republicacao do dashboard so a rotina do Claude faz (8h34) - mas os numeros dela voce ja ve aqui na aba Visao, ao vivo",
+ threads:"espelha junto com cada publicacao - dispare o ig-publish"
 };
 function appTok(){return (localStorage.getItem("pg_pat")||"").replace(/[^\x21-\x7E]/g,"")}
 async function fire(id,btn){
@@ -188,21 +189,25 @@ async function fire(id,btn){
   try{ if(window.Notification&&Notification.permission==="default")Notification.requestPermission(); }catch(e){}
   btn.disabled=true;btn.textContent="disparando...";
   let baseId=null;
-  if(bot.wf){ try{ const rb=await gh(`${API}/actions/workflows/${bot.wf}/runs?per_page=1&t=${Date.now()}`).then(x=>x.json()); baseId=((rb.workflow_runs||[])[0]||{}).id||null; }catch(e){} }
+  const wfBase=(t&&t.wf)||bot.wf;
+  if(wfBase){ try{ const rb=await gh(`${API}/actions/workflows/${wfBase}/runs?per_page=1&t=${Date.now()}`).then(x=>x.json()); baseId=((rb.workflow_runs||[])[0]||{}).id||null; }catch(e){} }
   const hdr={Authorization:"Bearer "+tok,"Content-Type":"application/json"};
   try{
-    const path=t.path||t.recommit;
+    const path=t.local?`requests/${t.local}.json`:(t.path||t.recommit);
     const url=`${API}/contents/${path}`;
     let sha=null,content=null;
     const r0=await fetch(`${url}?t=${Date.now()}`,{headers:{Authorization:"Bearer "+tok}});
     if(r0.ok){const j=await r0.json();sha=j.sha;content=j.content}
     const body={message:`disparo manual via PG Central: ${id}`};
-    if(t.recommit){ if(!content)throw new Error("arquivo nao encontrado"); body.content=content.replace(/\n/g,""); }
+    if(t.local){ body.content=btoa(JSON.stringify({quando:new Date().toISOString(),origem:"PG Central"})); }
+    else if(t.recommit){ if(!content)throw new Error("arquivo nao encontrado"); body.content=content.replace(/\n/g,""); }
     else{ body.content=btoa("fire "+new Date().toISOString()); }
     if(sha)body.sha=sha;
     const r=await fetch(url,{method:"PUT",headers:hdr,body:JSON.stringify(body)});
     if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||("HTTP "+r.status))}
-    if(bot.wf){ btn.textContent="\u23F3 disparado \u2014 aguardando o rob\u00f4..."; watchRun(id,bot.wf,baseId,btn); }
+    const wfAlvo=t.wf||bot.wf;
+    if(t.local){ btn.textContent="\u23F3 pedido enviado \u2014 aguardando o PC..."; watchLocal(id,t.local,btn); }
+    else if(wfAlvo){ btn.textContent="\u23F3 disparado \u2014 aguardando o rob\u00f4..."; watchRun(id,wfAlvo,baseId,btn); }
     else { btn.textContent="\u2713 disparado!"; btn.disabled=false; }
   }catch(e){btn.disabled=false;btn.textContent="erro: "+e.message.slice(0,40)}
 }
@@ -214,6 +219,30 @@ function notify(titulo,corpo){
   try{ if(navigator.vibrate)navigator.vibrate([120,60,120]); }catch(e){}
   try{ if(window.Notification&&Notification.permission==="granted"){new Notification(titulo,{body:corpo,icon:"icon-192.png"})} }catch(e){}
 }
+
+async function watchLocal(id,hbName,btn){
+  const t0=Date.now();
+  let antes=null;
+  try{ antes=await fetch(`${RAW}/heartbeats/${hbName}.json?t=${Date.now()}`).then(x=>x.ok?x.json():null); }catch(e){}
+  const marca=antes?antes.quando:null;
+  for(let i=0;i<50;i++){
+    await sleep(7000);
+    try{
+      const hbNow=await fetch(`${RAW}/heartbeats/${hbName}.json?t=${Date.now()}`).then(x=>x.ok?x.json():null);
+      if(hbNow&&hbNow.quando!==marca){
+        btn.textContent="\u2713 CONCLU\u00cdDO \u2014 "+(hbNow.resultado||"").replace("[disparo pelo app] ","").slice(0,60);
+        btn.style.background="var(--ok)"; btn.style.color="#0b2a16"; btn.disabled=false;
+        btn.onclick=()=>botInfo(id);
+        notify(`${BOTS[id].n}: conclu\u00eddo \u2713`, hbNow.resultado||"");
+        return;
+      }
+    }catch(e){}
+    btn.textContent=`\u25B6\uFE0F o PC pega o pedido em at\u00e9 3 min... ${Math.round((Date.now()-t0)/1000)}s`;
+  }
+  btn.textContent="\u231B sem resposta do PC \u2014 ele est\u00e1 ligado?";
+  btn.disabled=false;
+}
+
 async function watchRun(id,wf,baseId,btn){
   const t0=Date.now(); let runId=null;
   for(let i=0;i<70;i++){
@@ -304,7 +333,8 @@ async function botInfo(id){
     if(b.static) h+=row("Estado",b.static);
   }catch(e){ h+=row("Erro",e.message,"bad"); }
   let fireHtml="";
-  if(TRIG[id]) fireHtml=`<button class="mfire" style="background:var(--gold);color:#261442" onclick="fire('${id}',this)">\u26A1 Disparar agora \u2014 ${TRIG[id].label}</button>`;
+  if(TRIG[id]){ fireHtml=`<button class="mfire" style="background:var(--gold);color:#261442" onclick="fire('${id}',this)">\u26A1 Disparar agora \u2014 ${TRIG[id].label}</button>`;
+    if(TRIG[id].local) fireHtml+=`<div class="mnote">roda no seu PC \u2014 precisa estar ligado (o pc-agent busca pedidos a cada 3 min)</div>`; }
   else if(NOTRIG[id]) fireHtml=`<div class="mnote">${NOTRIG[id]}</div>`;
   box.innerHTML=`<h3>\u{1F916} ${b.n}</h3><div class="desc">${b.d}</div>${h}${fireHtml}<button class="mclose" onclick="document.getElementById('mbg').classList.remove('on')">fechar</button>`;
 }
