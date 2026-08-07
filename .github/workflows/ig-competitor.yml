@@ -1,0 +1,36 @@
+name: IG Competitor Watch
+on:
+  push:
+    paths: ['cloud/competitor_nudge.txt', 'cloud/competitors.json']
+  schedule:
+    - cron: '45 9 * * *'    # 06:45 Brasília
+    - cron: '5 10 * * *'    # retry 07:05
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install requests
+      - name: Radar
+        run: python cloud/competitor.py
+        env:
+          FB_TOKEN: ${{ secrets.FB_TOKEN }}
+          FB_IG_ID: ${{ secrets.FB_IG_ID }}
+      - name: Commit radar
+        run: |
+          git config user.name "ig-competitor"; git config user.email "ig-bot@users.noreply.github.com"
+          git add cloud/radar.md 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "radar: concorrencia [skip ci]"
+          for i in 1 2 3; do git pull --rebase origin ${{ github.ref_name }} && git push && break || sleep 4; done
+      - name: Andon
+        if: failure()
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh issue create --repo "${{ github.repository }}" --title "🚨 ANDON competitor-watch falhou" --body "run ${{ github.run_id }}"
