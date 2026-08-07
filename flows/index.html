@@ -44,10 +44,13 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--gold);outline-of
 details{margin-bottom:14px}
 summary{cursor:pointer;font-size:12.5px;color:var(--lav);font-weight:700}
 .footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--ink2)}
+.voltar{display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);color:var(--lav);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:800;text-decoration:none;margin-bottom:12px}
+.voltar:hover{border-color:var(--gold);color:var(--gold)}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <a class="voltar" href="../app/" id="btvoltar">‹ PG Central</a>
   <div class="eyebrow">SS Dark · motor de venda · comment-bot</div>
   <h1><span class="pg">PG</span> Flows</h1>
   <div class="sub">Seu ManyChat. Crie fluxos: <b style="color:var(--gold)">palavra no comentário → resposta pública → DM automática</b>. Salvou, o robô obedece em ~1 min.</div>
@@ -200,5 +203,6 @@ async function saveComps(){
 }
 loadComps();
 </script>
+<script>if(window.self!==window.top){var b=document.getElementById("btvoltar");if(b)b.style.display="none";}</script>
 </body>
 </html>
