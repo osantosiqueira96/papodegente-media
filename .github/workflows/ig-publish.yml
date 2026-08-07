@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
+  push:
+    paths:
+      - 'cloud/queue.json'
+      - 'cloud/posts/**'
 
 permissions:
   contents: write
