@@ -158,10 +158,19 @@ def main():
             if tid:
                 item["threads_id"] = tid
         except Exception as e:
-            item["status"] = "error"
-            item["note"] = str(e)[:200]
-            errs.append(f"{name} ({item['when']}): {str(e)[:160]}")
-            print(f"    ERRO: {e}")
+            msg = str(e)
+            # limite de requisicao da Meta = TEMPORARIO: segura na fila e tenta de novo
+            transitorio = ("request limit" in msg or '"code":4' in msg or "2207051" in msg
+                           or "rate limit" in msg.lower() or '"code":32' in msg)
+            if transitorio:
+                item["status"] = "pending"
+                item["note"] = f"limite temporario da Meta em {now.strftime('%H:%M')} — nova tentativa no proximo ciclo"
+                print(f"    LIMITE DA META (temporario): fica na fila e tenta de novo")
+            else:
+                item["status"] = "error"
+                item["note"] = msg[:200]
+                errs.append(f"{name} ({item['when']}): {msg[:160]}")
+                print(f"    ERRO: {e}")
         changed = True
     if changed:
         json.dump(q, open(QUEUE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
