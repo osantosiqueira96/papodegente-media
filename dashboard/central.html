@@ -1,0 +1,187 @@
+<title>Central SS Dark — @papodegentebr</title>
+<style>
+:root{
+  --bg0:#150925; --bg1:#241042; --card:#2b1550; --card2:#231043; --line:#3d2266;
+  --ink:#F3EDFA; --ink2:#B8A6D9; --lav:#A374FF; --gold:#FFD100;
+  --ok:#4ade80; --run:#60a5fa; --warn:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:radial-gradient(120% 80% at 20% 0%, var(--bg1), var(--bg0) 70%);
+  color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  min-height:100vh; padding:28px 20px 60px;
+}
+.wrap{max-width:1060px;margin:0 auto}
+.eyebrow{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--lav);font-weight:700}
+h1{font-size:clamp(28px,5vw,44px);font-weight:900;text-transform:uppercase;letter-spacing:-.5px;line-height:1;margin:6px 0 4px}
+h1 .pg{display:inline-block;background:var(--gold);color:#261442;border-radius:10px;padding:2px 12px}
+.sub{color:var(--ink2);font-size:14px;margin-bottom:26px}
+.grid{display:grid;gap:14px}
+.cols2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px}
+.card h2{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--lav);font-weight:800;margin-bottom:12px}
+/* north star */
+.north{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:14px}
+.stat{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:16px;padding:16px}
+.stat .n{font-family:ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums;font-size:40px;font-weight:800;line-height:1}
+.stat .n.gold{color:var(--gold)}
+.stat .l{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink2);margin-top:6px}
+.stat .d{font-size:12px;color:var(--ink2);margin-top:4px}
+/* fluxo da visao */
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;font-weight:600}
+.flow .step{background:var(--card2);border:1px solid var(--line);padding:7px 12px;border-radius:999px;white-space:nowrap}
+.flow .step.on{border-color:var(--gold);color:var(--gold)}
+.flow .arr{color:var(--lav)}
+/* desafios */
+.des{display:flex;flex-direction:column;gap:10px}
+.drow{display:grid;grid-template-columns:26px 1fr 90px;gap:10px;align-items:center}
+.dnum{width:26px;height:26px;border-radius:8px;background:var(--card2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--lav)}
+.dname{font-size:13.5px}
+.dname small{display:block;color:var(--ink2);font-size:11.5px}
+.bar{height:8px;border-radius:99px;background:#1b0b33;overflow:hidden;position:relative}
+.bar i{position:absolute;inset:0;right:auto;background:var(--gold);border-radius:99px}
+.bar.done i{background:var(--ok)}
+.pct{font-family:ui-monospace,monospace;font-size:11px;color:var(--ink2);text-align:right}
+/* robos */
+.bots{display:flex;flex-direction:column;gap:8px;font-size:13px}
+.bot{display:flex;gap:8px;align-items:baseline;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:7px}
+.bot:last-child{border:none;padding-bottom:0}
+.bot b{font-family:ui-monospace,monospace;font-weight:600}
+.chip{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;font-weight:800;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.chip.ok{background:rgba(74,222,128,.12);color:var(--ok)}
+.chip.run{background:rgba(96,165,250,.12);color:var(--run)}
+.chip.todo{background:rgba(163,116,255,.14);color:var(--lav)}
+.chip.off{background:rgba(248,113,113,.12);color:var(--warn)}
+/* calendario */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--lav);text-align:left;padding:0 8px 8px 0;font-weight:800}
+td{padding:6px 8px 6px 0;border-top:1px solid var(--line);vertical-align:top}
+td.dt{font-family:ui-monospace,monospace;white-space:nowrap;color:var(--ink2)}
+.tag{font-size:10px;font-weight:800;letter-spacing:.5px;padding:2px 7px;border-radius:6px}
+.tag.pub{background:rgba(74,222,128,.14);color:var(--ok)}
+.tag.agd{background:rgba(96,165,250,.14);color:var(--run)}
+.tag.prod{background:rgba(255,209,0,.13);color:var(--gold)}
+.tag.cloud{background:rgba(163,116,255,.16);color:var(--lav)}
+/* kaizen */
+.kai{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.kbox{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 6px}
+.kbox .n{font-family:ui-monospace,monospace;font-size:26px;font-weight:800}
+.kbox .l{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--ink2);margin-top:3px}
+.kai-note{grid-column:1/-1;font-size:12px;color:var(--ink2);text-align:left;margin-top:4px}
+.rule{margin-top:10px;background:rgba(255,209,0,.07);border:1px solid rgba(255,209,0,.35);border-radius:12px;padding:10px 12px;font-size:12.5px}
+.rule b{color:var(--gold)}
+ul.clean{list-style:none;font-size:13px;display:flex;flex-direction:column;gap:8px}
+ul.clean li{padding-left:18px;position:relative}
+ul.clean li::before{content:"";position:absolute;left:2px;top:7px;width:7px;height:7px;border-radius:99px;background:var(--gold)}
+ul.clean li.okli::before{background:var(--ok)}
+ul.clean li.warnli::before{background:var(--warn)}
+.foot{margin-top:22px;color:var(--ink2);font-size:12px;text-align:center}
+.foot b{color:var(--gold)}
+@media (max-width:640px){ .kai{grid-template-columns:repeat(3,1fr)} }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Central de comando · SS Dark · atualizado 06/08/2026 ~22h30</div>
+  <h1><span class="pg">PG</span> Operação @papodegentebr</h1>
+  <div class="sub">Visão: <b style="color:var(--gold)">você entrega o link → a máquina posta, vende e escala.</b> Guiados por números: seguidores + alcance.</div>
+
+  <div class="north">
+    <div class="stat"><div class="n gold">0</div><div class="l">Seguidores ★</div><div class="d">north-star #1</div></div>
+    <div class="stat"><div class="n gold">143</div><div class="l">Alcance total ★</div><div class="d">north-star #2</div></div>
+    <div class="stat"><div class="n">12</div><div class="l">Posts no ar</div><div class="d">+10 agendados</div></div>
+    <div class="stat"><div class="n">139</div><div class="l">Post vencedor</div><div class="d">reel de IA → replicando ×2</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <h2>O fluxo-mestre (onde cada peça se encaixa)</h2>
+    <div class="flow">
+      <span class="step on">Conteúdo diário (motor v3)</span><span class="arr">→</span>
+      <span class="step on">Alcance</span><span class="arr">→</span>
+      <span class="step">Seguidor</span><span class="arr">→</span>
+      <span class="step">Comentário "EU QUERO"</span><span class="arr">→</span>
+      <span class="step">DM automática c/ link</span><span class="arr">→</span>
+      <span class="step">Página (GitHub Pages)</span><span class="arr">→</span>
+      <span class="step">💰 Venda</span><span class="arr">→</span>
+      <span class="step">Tráfego pago → escala</span>
+    </div>
+  </div>
+
+  <div class="grid cols2">
+    <div class="card">
+      <h2>Os 6 desafios rumo à autonomia</h2>
+      <div class="des">
+        <div class="drow"><div class="dnum">1</div><div class="dname">Operação 100% Claude<small>falta: stories rotina, resp. comentários/DM</small></div><div><div class="bar"><i style="width:60%"></i></div><div class="pct">60%</div></div></div>
+        <div class="drow"><div class="dnum">2</div><div class="dname">Permissões da API (5/5 escopos)<small>✅ concluído HOJE — comentários + DMs liberados</small></div><div><div class="bar done"><i style="width:100%"></i></div><div class="pct">100%</div></div></div>
+        <div class="drow"><div class="dnum">3</div><div class="dname">Audiência 0 → 1k → 10k<small>máquina pronta; distribuição é o jogo</small></div><div><div class="bar"><i style="width:5%"></i></div><div class="pct">5%</div></div></div>
+        <div class="drow"><div class="dnum">4</div><div class="dname">Link → posta → vende<small>fluxo definido; comment-bot em construção</small></div><div><div class="bar"><i style="width:15%"></i></div><div class="pct">15%</div></div></div>
+        <div class="drow"><div class="dnum">5</div><div class="dname">Tráfego pago<small>casos de uso Marketing API já marcados</small></div><div><div class="bar"><i style="width:10%"></i></div><div class="pct">10%</div></div></div>
+        <div class="drow"><div class="dnum">6</div><div class="dname">Operação total via chat<small>relatório diário + andon já rodando</small></div><div><div class="bar"><i style="width:25%"></i></div><div class="pct">25%</div></div></div>
+      </div>
+      <div class="rule">📏 <b>Regra-mestra:</b> números &gt; linha editorial. O que der seguidor/alcance manda. (Por isso o "off-brand" de IA virou benchmark.)</div>
+    </div>
+
+    <div class="card">
+      <h2>🤖 Frota de robôs (GitHub, R$0)</h2>
+      <div class="bots">
+        <div class="bot"><span><b>ig-publish</b> — publica a fila a cada 30min + no push</span><span class="chip ok">validado ✓</span></div>
+        <div class="bot"><span><b>andon</b> — falha → issue → e-mail na hora</span><span class="chip ok">ativo</span></div>
+        <div class="bot"><span><b>ig-report</b> — relatório diário 21h no seu e-mail</span><span class="chip ok">1º amanhã</span></div>
+        <div class="bot"><span><b>ig-refresh</b> — renova o token a cada 14 dias</span><span class="chip ok">agendado</span></div>
+        <div class="bot"><span><b>ig-comment-bot</b> — responde + palavra-chave→DM</span><span class="chip run">próximo</span></div>
+        <div class="bot"><span><b>trend-scout</b> — pauta do dia por e-mail</span><span class="chip todo">fila</span></div>
+        <div class="bot"><span><b>content-factory</b> — renderizar reels na nuvem</span><span class="chip todo">fila</span></div>
+        <div class="bot"><span><b>voice-cloner</b> — Chatterbox na nuvem (16GB)</span><span class="chip todo">fila</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📅 Esteira de conteúdo (06 → 13/08)</h2>
+      <div style="overflow-x:auto">
+      <table>
+        <tr><th>Dia</th><th>Peças</th><th>Via</th></tr>
+        <tr><td class="dt">06/08</td><td>Estático ✓ · Carrossel iFood ✓ (recuperado) · Reel 3 Potes ✓</td><td><span class="tag pub">PUBLICADO</span></td></tr>
+        <tr><td class="dt">07/08</td><td>Estático Selic · Carrossel Selic · Reel FGTS</td><td><span class="tag agd">PC local</span></td></tr>
+        <tr><td class="dt">08/08</td><td>Estático + Carrossel + Reel — Golpe do Pix</td><td><span class="tag agd">PC local</span></td></tr>
+        <tr><td class="dt">09/08</td><td>3 reels: Imposto · Inflação · Pra onde vai</td><td><span class="tag agd">PC local</span></td></tr>
+        <tr><td class="dt">10/08</td><td>Reel Conta de Luz (12h) · Reel "Feito por IA" (19h)</td><td><span class="tag cloud">☁️ NUVEM</span> <span class="tag prod">IA no forno</span></td></tr>
+        <tr><td class="dt">11/08</td><td>Reel Nome Limpo (19h)</td><td><span class="tag cloud">☁️ NUVEM</span></td></tr>
+        <tr><td class="dt">12/08</td><td>Reel "IA de graça" (12h) · Reel Pix Automático (19h)</td><td><span class="tag cloud">☁️ NUVEM</span> <span class="tag prod">IA no forno</span></td></tr>
+        <tr><td class="dt">13/08</td><td>Reel Consignado (19h)</td><td><span class="tag cloud">☁️ NUVEM</span></td></tr>
+      </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>♻️ Motor kaizen + lean (planilha de controle)</h2>
+      <div class="kai">
+        <div class="kbox"><div class="n" style="color:var(--ok)">16</div><div class="l">Soluções<br>comprovadas</div></div>
+        <div class="kbox"><div class="n" style="color:var(--warn)">16</div><div class="l">Impedimentos<br>mapeados</div></div>
+        <div class="kbox"><div class="n" style="color:var(--run)">9</div><div class="l">Itens Lean<br>4 eliminados</div></div>
+        <div class="kai-note">Ciclo: detectar → resolver → registrar → aprender → observar → recomeçar. Hoje: host imgbb <b style="color:var(--ok)">resolvido</b> · "off-brand" <b style="color:var(--gold)">revertido pelos números</b> · camada humana <b style="color:var(--run)">fora do escopo (desafio 100% máquina)</b>.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>💬 Motor de venda: comment-bot (nosso ManyChat)</h2>
+      <ul class="clean">
+        <li>Fluxos configuráveis: palavra-chave → responde comentário + DM com link</li>
+        <li>100% oficial (API própria, sem risco de ban) e R$0/mês</li>
+        <li class="okli">Permissões destravadas hoje (Desafio 2 ✅)</li>
+        <li>Status: <b style="color:var(--run)">em construção</b> — fluxo piloto "EU QUERO"</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>⏳ Aguardando / próximos passos</h2>
+      <ul class="clean">
+        <li class="okli"><b>Do Yuri: nada urgente.</b> Amanhã 21h chega o 1º relatório diário no e-mail</li>
+        <li>2 reels de IA renderizando → agendo na nuvem (dias 10 e 12)</li>
+        <li>Dashboard passa a se atualizar 1×/dia (agente da rotina diária)</li>
+        <li>Produto próprio v1 (Kit 3 Potes / Guia Anti-Golpe) — decidir pelo 1º relatório</li>
+        <li>PC pode desligar após 09/08: dias 10-13 já são 100% nuvem ☁️</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">Dashboard vivo do projeto — peça <b>"atualiza o dashboard"</b> a qualquer momento que eu regravo com os números do dia. · SS Agency · guiados por números 📏</div>
+</div>
