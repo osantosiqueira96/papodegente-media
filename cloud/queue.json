@@ -52,5 +52,11 @@
         "type":  "carousel",
         "when":  "2026-08-08 19:00",
         "status":  "pending"
+    },
+    {
+        "name":  "Reel-05---Golpe-Pix",
+        "type":  "reel",
+        "when":  "2026-08-08 21:00",
+        "status":  "pending"
     }
 ]
