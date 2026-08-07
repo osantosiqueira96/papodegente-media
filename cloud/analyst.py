@@ -19,7 +19,7 @@ def get(path, params):
 def main():
     now = datetime.now(TZ); hoje = now.strftime("%Y-%m-%d")
     perfil = get(IG, {"fields": "followers_count,media_count"})
-    media = get(f"{IG}/media", {"fields": "id,caption,media_type,timestamp,like_count,comments_count,permalink", "limit": 30}).get("data", [])
+    media = get(f"{IG}/media", {"fields": "id,caption,media_type,timestamp,like_count,comments_count,permalink", "limit": 12}).get("data", [])
     posts = []
     for m in media:
         reach = saved = 0
