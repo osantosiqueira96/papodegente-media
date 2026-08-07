@@ -120,11 +120,5 @@
         "type":  "reel",
         "when":  "2026-08-08 15:00",
         "status":  "pending"
-    },
-    {
-        "name":  "Reel-PG-AUTO-07-08",
-        "type":  "reel",
-        "when":  "2026-08-08 15:00",
-        "status":  "pending"
     }
 ]
