@@ -27,7 +27,7 @@ def main():
     st = json.load(open(STATE, encoding="utf-8-sig")) if os.path.exists(STATE) else {}
     if st.get("last_date") == hoje:
         print("story de hoje ja foi — nada a fazer"); return
-    media = get(f"{IG}/media", {"fields": "id,media_type,media_url,thumbnail_url,timestamp,like_count", "limit": 12}).get("data", [])
+    media = get(f"{IG}/media", {"fields": "id,media_type,media_url,thumbnail_url,timestamp,like_count", "limit": 6}).get("data", [])
     corte = (datetime.now(TZ) - timedelta(hours=26)).isoformat()
     recentes = [m for m in media if m.get("timestamp", "") >= corte and m.get("media_url") or m.get("thumbnail_url")]
     alvo = None; best = -1
