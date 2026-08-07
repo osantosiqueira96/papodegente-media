@@ -80,8 +80,9 @@ let data={config:{ignorar_usuarios:["papodegentebr"],max_acoes_por_ciclo:20},flo
 
 const $=id=>document.getElementById(id);
 function toast(m,err){const t=$("toast");t.textContent=m;t.className="toast"+(err?" err":"");t.style.display="block";setTimeout(()=>t.style.display="none",3800)}
-function tok(){return localStorage.getItem("pg_pat")||""}
-function saveTok(){const v=$("tok").value.trim();if(!v)return toast("cola o token primeiro",1);localStorage.setItem("pg_pat",v);$("tokbox").open=false;toast("token guardado ✓");load()}
+function clean(s){return (s||"").replace(/[^\x21-\x7E]/g,"")} // remove espaços/caracteres invisíveis de copia-e-cola
+function tok(){return clean(localStorage.getItem("pg_pat"))}
+function saveTok(){const v=clean($("tok").value);if(!v)return toast("cola o token primeiro",1);localStorage.setItem("pg_pat",v);$("tokbox").open=false;toast("token guardado ✓");load()}
 
 function b64enc(s){return btoa(unescape(encodeURIComponent(s)))}
 function b64dec(s){return decodeURIComponent(escape(atob(s.replace(/\n/g,""))))}
