@@ -1,0 +1,66 @@
+{
+ "quando": "2026-08-07 09:07",
+ "seguidores": 1,
+ "posts": 12,
+ "alcance_total": 154,
+ "ult24h": [
+  {
+   "hora": "06/08 22:08",
+   "tipo": "VIDEO",
+   "reach": 3,
+   "likes": 0,
+   "cap": "O truque dos 3 potes: divida o salário no dia que ele cai. 💜"
+  },
+  {
+   "hora": "06/08 20:18",
+   "tipo": "CAROUSEL_ALBUM",
+   "reach": 1,
+   "likes": 0,
+   "cap": "Por que seu lanche no app custa mais caro? 🍔  Não é impressã"
+  },
+  {
+   "hora": "06/08 12:08",
+   "tipo": "IMAGE",
+   "reach": 1,
+   "likes": 0,
+   "cap": "Você não é ruim com dinheiro. O dinheiro é que é pouco. 💜  4"
+  }
+ ],
+ "top5": [
+  {
+   "reach": 140,
+   "tipo": "VIDEO",
+   "data": "05/08",
+   "cap": "Isso não é autocomplete. É um agente de IA que programa junt",
+   "link": "https://www.instagram.com/reel/DbqbT5jlP7m/"
+  },
+  {
+   "reach": 4,
+   "tipo": "VIDEO",
+   "data": "05/08",
+   "cap": "3 gastos invisíveis que somem com seu salário — e você nem v",
+   "link": "https://www.instagram.com/reel/DbqTpHenTBD/"
+  },
+  {
+   "reach": 3,
+   "tipo": "VIDEO",
+   "data": "06/08",
+   "cap": "O truque dos 3 potes: divida o salário no dia que ele cai. 💜",
+   "link": "https://www.instagram.com/reel/DbuEsZhAuOj/"
+  },
+  {
+   "reach": 2,
+   "tipo": "CAROUSEL_ALBUM",
+   "data": "05/08",
+   "cap": "Esse carrossel foi feito por IA — do roteiro ao design, sem ",
+   "link": "https://www.instagram.com/p/Dbqg-AIoCcv/"
+  },
+  {
+   "reach": 2,
+   "tipo": "CAROUSEL_ALBUM",
+   "data": "05/08",
+   "cap": "Você usa o Nubank de graça — mas ele lucra bilhões. Como? 🟣 ",
+   "link": "https://www.instagram.com/p/Dbqfn8eoPEB/"
+  }
+ ]
+}
