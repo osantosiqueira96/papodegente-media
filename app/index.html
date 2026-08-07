@@ -64,6 +64,9 @@ iframe{width:100%;height:100%;border:0}
 .mrow .k{color:var(--ink2);font-size:11px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
 .mrow .v{text-align:right;word-break:break-word}
 .v.ok{color:var(--ok)} .v.bad{color:var(--warn)} .v.gold{color:var(--gold)}
+.mfire{margin-top:12px;width:100%;background:var(--gold);color:#261442;border:none;border-radius:12px;padding:12px;font-weight:900;font-size:13px;letter-spacing:.5px;cursor:pointer;text-transform:uppercase}
+.mfire:disabled{opacity:.55;cursor:default}
+.mnote{font-size:11px;color:var(--ink2);margin-top:8px;text-align:center}
 .mclose{margin-top:14px;width:100%;background:var(--card2);border:1px solid var(--line);color:var(--ink2);border-radius:12px;padding:10px;font-weight:800;cursor:pointer}
 
 </style>
@@ -159,6 +162,47 @@ const BOTS={
 };
 const fmtBR=iso=>{try{return new Date(iso).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}catch(e){return iso}};
 function row(k,v,cls){return `<div class="mrow"><span class="k">${k}</span><span class="v ${cls||""}">${v}</span></div>`}
+
+const TRIG={
+ publish:{path:"cloud/posts/nudge.txt",label:"publicar a fila vencida agora"},
+ report:{path:"cloud/report_nudge.txt",label:"gerar o relatorio agora"},
+ trend:{path:"cloud/trend_nudge.txt",label:"gerar a pauta agora"},
+ analyst:{path:"cloud/analyst_nudge.txt",label:"rodar a analise agora"},
+ story:{path:"cloud/story_nudge.txt",label:"postar o story de hoje agora"},
+ comment:{recommit:"cloud/flows.json",label:"varrer comentarios agora"}
+};
+const NOTRIG={
+ planilha:"roda no seu PC (8h50 ou ao ligar) - nao dispara pela web",
+ nudger:"roda no seu PC a cada 20 min - nao dispara pela web",
+ pgbuilder:"roda no seu PC a cada 30 min - jogue clipes na inbox que ele age",
+ dashboard:"rotina do claude.ai (8h34) - dispara pelas Rotinas do Claude",
+ refresh:"renovacao automatica a cada 20 dias - sem disparo manual",
+ factory:"dispara sozinho ao receber uma spec nova no repositorio",
+ threads:"dormente - aguardando a chave do Threads",
+ radar:"dormente - aguardando o token FB"
+};
+function appTok(){return (localStorage.getItem("pg_pat")||"").replace(/[^\x21-\x7E]/g,"")}
+async function fire(id,btn){
+  const t=TRIG[id]; const tok=appTok();
+  if(!tok){btn.textContent="configure o token na aba Flows (Configurar acesso)";return}
+  btn.disabled=true;btn.textContent="disparando...";
+  const hdr={Authorization:"Bearer "+tok,"Content-Type":"application/json"};
+  try{
+    const path=t.path||t.recommit;
+    const url=`${API}/contents/${path}`;
+    let sha=null,content=null;
+    const r0=await fetch(`${url}?t=${Date.now()}`,{headers:{Authorization:"Bearer "+tok}});
+    if(r0.ok){const j=await r0.json();sha=j.sha;content=j.content}
+    const body={message:`disparo manual via PG Central: ${id}`};
+    if(t.recommit){ if(!content)throw new Error("arquivo nao encontrado"); body.content=content.replace(/\n/g,""); }
+    else{ body.content=btoa("fire "+new Date().toISOString()); }
+    if(sha)body.sha=sha;
+    const r=await fetch(url,{method:"PUT",headers:hdr,body:JSON.stringify(body)});
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||("HTTP "+r.status))}
+    btn.textContent="\u2713 disparado! executa em ~1 min";
+  }catch(e){btn.disabled=false;btn.textContent="erro: "+e.message.slice(0,40)}
+}
+
 async function botInfo(id){
   const b=BOTS[id]; const box=document.getElementById("mbox");
   box.innerHTML=`<h3>\u{1F916} ${b.n}</h3><div class="desc">${b.d}</div><div class="loading">consultando...</div>`;
@@ -217,7 +261,10 @@ async function botInfo(id){
     }
     if(b.static) h+=row("Estado",b.static);
   }catch(e){ h+=row("Erro",e.message,"bad"); }
-  box.innerHTML=`<h3>\u{1F916} ${b.n}</h3><div class="desc">${b.d}</div>${h}<button class="mclose" onclick="document.getElementById('mbg').classList.remove('on')">fechar</button>`;
+  let fireHtml="";
+  if(TRIG[id]) fireHtml=`<button class="mfire" onclick="fire('${id}',this)">\u26A1 Disparar agora \u2014 ${TRIG[id].label}</button>`;
+  else if(NOTRIG[id]) fireHtml=`<div class="mnote">${NOTRIG[id]}</div>`;
+  box.innerHTML=`<h3>\u{1F916} ${b.n}</h3><div class="desc">${b.d}</div>${h}${fireHtml}<button class="mclose" onclick="document.getElementById('mbg').classList.remove('on')">fechar</button>`;
 }
 
 async function diario(){
