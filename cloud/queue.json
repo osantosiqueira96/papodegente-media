@@ -35,7 +35,8 @@
   "name": "Carrossel-09---Selic",
   "type": "carousel",
   "when": "2026-08-07 19:00",
-  "status": "pending"
+  "status": "error",
+  "note": "17841442647990739/media_publish: 403 {\"error\":{\"message\":\"Application request limit reached\",\"type\":\"OAuthException\",\"is_transient\":false,\"code\":4,\"error_subcode\":2207051,\"error_user_title\":\"action is"
  },
  {
   "name": "Reel-04---FGTS-lucro",
