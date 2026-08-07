@@ -70,6 +70,14 @@ summary{cursor:pointer;font-size:12.5px;color:var(--lav);font-weight:700}
     <button class="btn" onclick="save()" id="savebtn">💾 Salvar no robô</button>
   </div>
 
+  <div class="card" style="margin-top:18px">
+    <label>🕵️ Radar — perfis monitorados (1 @ por linha, sem @)</label>
+    <textarea id="comps" style="min-height:90px" placeholder="professorbabuino
+v4company"></textarea>
+    <div class="hint">O robô espiona esses perfis todo dia 6h45 e põe os destaques na sua pauta das 7h30. Seguiu alguém novo que vale copiar o ângulo? Cola aqui.</div>
+    <div class="row" style="margin-top:8px"><button class="btn" onclick="saveComps()">💾 Salvar radar</button><span class="hint" id="compst"></span></div>
+  </div>
+
   <div class="footer">O robô roda a cada 15 min (e na hora, ao salvar). Respostas 100% pela API oficial do Instagram. · @papodegentebr</div>
 </div>
 <div class="toast" id="toast"></div>
@@ -165,6 +173,34 @@ async function save(){
   $("savebtn").disabled=false;
 }
 load();
+
+const CPATH="cloud/competitors.json"; let csha=null;
+async function loadComps(){
+  try{
+    const h=tok()?{Authorization:"Bearer "+tok()}:{};
+    const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${CPATH}?t=${Date.now()}`,{headers:h});
+    if(!r.ok)return;
+    const j=await r.json(); csha=j.sha;
+    const d=JSON.parse(b64dec(j.content));
+    document.getElementById("comps").value=(d.perfis||[]).join("
+");
+  }catch(e){}
+}
+async function saveComps(){
+  if(!tok()){document.getElementById("tokbox").open=true;return toast("configura o token primeiro",1)}
+  const perfis=document.getElementById("comps").value.split("
+").map(s=>s.trim().replace(/^@/,"")).filter(Boolean);
+  try{
+    const r0=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${CPATH}?t=${Date.now()}`,{headers:{Authorization:"Bearer "+tok()}});
+    if(r0.ok){csha=(await r0.json()).sha}
+    const body={message:"radar: perfis editados no PG Flows",content:b64enc(JSON.stringify({perfis:perfis},null,1)),sha:csha};
+    const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${CPATH}`,{method:"PUT",headers:{Authorization:"Bearer "+tok(),"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||("HTTP "+r.status))}
+    csha=(await r.json()).content.sha;
+    toast(`✓ Radar salvo: ${perfis.length} perfil(is)`);
+  }catch(e){toast("erro: "+e.message,1)}
+}
+loadComps();
 </script>
 </body>
 </html>
