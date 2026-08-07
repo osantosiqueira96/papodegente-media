@@ -1,7 +1,7 @@
 name: IG Content Factory
 on:
   push:
-    paths: ['factory/spec-*.json']
+    paths: ['factory/spec-*.json', 'factory/nudge.txt']
   workflow_dispatch:
 
 permissions:
