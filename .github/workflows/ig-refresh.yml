@@ -1,0 +1,25 @@
+name: IG Token Refresh
+on:
+  schedule:
+    - cron: '0 6 */14 * *'   # a cada 14 dias, 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Renovar token (ig_refresh_token)
+        id: ref
+        run: |
+          NEW=$(curl -s "https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${{ secrets.IG_TOKEN }}" | python3 -c "import sys,json;print(json.load(sys.stdin).get('access_token',''))")
+          if [ -z "$NEW" ]; then echo "refresh falhou"; exit 1; fi
+          echo "::add-mask::$NEW"
+          echo "token=$NEW" >> "$GITHUB_OUTPUT"
+      - name: Atualizar secret IG_TOKEN
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.ADMIN_PAT }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "sem ADMIN_PAT — atualize o secret IG_TOKEN manualmente antes de 60 dias"; exit 0; fi
+          echo "${{ steps.ref.outputs.token }}" | gh secret set IG_TOKEN --repo "${{ github.repository }}"
+          echo "secret IG_TOKEN atualizado"
