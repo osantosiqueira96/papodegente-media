@@ -10,5 +10,11 @@
         "type":  "reel",
         "when":  "2026-08-11 19:00",
         "status":  "pending"
+    },
+    {
+        "name":  "Reel-11---Pix-Automatico",
+        "type":  "reel",
+        "when":  "2026-08-12 19:00",
+        "status":  "pending"
     }
 ]
