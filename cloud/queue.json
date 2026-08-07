@@ -40,5 +40,11 @@
         "type":  "reel",
         "when":  "2026-08-07 21:00",
         "status":  "pending"
+    },
+    {
+        "name":  "Estatico-03---Golpe-Pix",
+        "type":  "photo",
+        "when":  "2026-08-08 12:00",
+        "status":  "pending"
     }
 ]
