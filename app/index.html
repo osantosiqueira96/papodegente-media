@@ -67,6 +67,12 @@ iframe{width:100%;height:100%;border:0}
 .mfire{margin-top:12px;width:100%;background:var(--gold);color:#261442;border:none;border-radius:12px;padding:12px;font-weight:900;font-size:13px;letter-spacing:.5px;cursor:pointer;text-transform:uppercase}
 .mfire:disabled{opacity:.55;cursor:default}
 .mnote{font-size:11px;color:var(--ink2);margin-top:8px;text-align:center}
+.cota{margin:9px 0}
+.cota .lin{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.cota .lin b{font-family:ui-monospace,monospace}
+.barq{height:7px;border-radius:99px;background:#1b0b33;overflow:hidden}
+.barq i{display:block;height:100%;border-radius:99px;background:var(--ok)}
+.barq i.med{background:var(--gold)} .barq i.alt{background:var(--warn)}
 .mclose{margin-top:14px;width:100%;background:var(--card2);border:1px solid var(--line);color:var(--ink2);border-radius:12px;padding:10px;font-weight:800;cursor:pointer}
 
 </style>
@@ -111,6 +117,36 @@ function md(s){
     .replace(/(https?:\/\/[^\s<)]+)/g,'<a href="$1" target="_blank">$1</a>')
     .replace(/\n/g,"<br>");
 }
+
+async function cotas(){
+  let h='<div class="card"><h2>\u{1F4CA} Cotas em tempo real</h2>';
+  const barra=(usado,total,rot,extra)=>{
+    const pct=Math.min(100,Math.round(usado/total*100));
+    const cls=pct>=80?"alt":pct>=50?"med":"";
+    return `<div class="cota"><div class="lin"><span>${rot}</span><b>${usado}/${total} \u00b7 ${pct}%</b></div>
+      <div class="barq"><i class="${cls}" style="width:${Math.max(2,pct)}%"></i></div>
+      ${extra?`<div class="mnote" style="text-align:left;margin-top:3px">${extra}</div>`:""}</div>`;
+  };
+  try{
+    const lim=await fetch(`${RAW}/cloud/limits.json?t=${Date.now()}`).then(x=>x.ok?x.json():null);
+    if(lim&&lim.meta_publicacoes){
+      const m=lim.meta_publicacoes;
+      h+=barra(m.usados,m.total,"\u{1F4F8} Publica\u00e7\u00f5es no Instagram (24h)",`medido em ${lim.quando} \u2014 o rob\u00f4 freia sozinho perto do teto`);
+    }
+  }catch(e){}
+  try{
+    const t=appTok();
+    if(t){
+      const rl=await gh("https://api.github.com/rate_limit").then(x=>x.json());
+      const c=rl.resources.core;
+      const zera=new Date(c.reset*1000).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+      h+=barra(c.used,c.limit,"\u{1F419} Chamadas ao GitHub (hora)",`zera \u00e0s ${zera} \u00b7 Actions ilimitado (repo p\u00fablico)`);
+    }
+  }catch(e){}
+  h+='</div>';
+  return h;
+}
+
 async function visao(){
   try{
     const [m,q]=await Promise.all([
@@ -134,6 +170,7 @@ async function visao(){
     }
     h+=`</div>`;
     if(err.length){ h+=`<div class="card"><h2 style="color:var(--warn)">⚠️ Erros</h2>`+err.map(e=>`<div class="item"><span>${e.name}</span><span>${(e.note||"").slice(0,60)}</span></div>`).join("")+`</div>`; }
+    h+=await cotas();
     h+=`<div class="card"><h2>🤖 Frota (17 robôs) — toque para ver a última atividade</h2><div class="bots" id="bots">
       <span class="on" data-b="publish">publish</span><span class="on" data-b="report">report 8h</span><span class="on" data-b="comment">comment-bot</span><span class="on" data-b="refresh">refresh</span>
       <span class="on" data-b="dashboard">dashboard 8h34</span><span class="on" data-b="planilha">planilha 8h50</span><span class="on" data-b="trend">trend 7h30</span><span class="on" data-b="factory">factory</span>
