@@ -186,6 +186,36 @@ const NOTRIG={
  threads:"espelha junto com cada publicacao - dispare o ig-publish"
 };
 function appTok(){return (localStorage.getItem("pg_pat")||"").replace(/[^\x21-\x7E]/g,"")}
+
+async function antecipar(btn){
+  const tok=appTok();
+  if(!tok){btn.textContent="configure o token na aba Flows";return}
+  try{ if(window.Notification&&Notification.permission==="default")Notification.requestPermission(); }catch(e){}
+  btn.disabled=true; btn.textContent="preparando...";
+  try{
+    const r0=await gh(`${API}/contents/cloud/queue.json?t=${Date.now()}`).then(x=>x.json());
+    const q=JSON.parse(decodeURIComponent(escape(atob(r0.content.replace(/\n/g,"")))));
+    const pend=q.filter(x=>x.status==="pending").sort((a,b)=>a.when.localeCompare(b.when));
+    if(!pend.length){ btn.textContent="fila vazia \u2014 nada para antecipar"; btn.disabled=false; return; }
+    const alvo=pend[0];
+    const d=new Date(Date.now()-60000);
+    const pad=n=>String(n).padStart(2,"0");
+    const agora=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    alvo.when=agora;
+    const antes=q.filter(x=>x.status==="published").length;
+    window.__pubAntes=antes;
+    let baseId=null;
+    try{ const rb=await gh(`${API}/actions/workflows/ig-publish.yml/runs?per_page=1&t=${Date.now()}`).then(x=>x.json()); baseId=((rb.workflow_runs||[])[0]||{}).id||null; }catch(e){}
+    const body={message:`antecipar publicacao: ${alvo.name} (PG Central)`,
+      content:btoa(unescape(encodeURIComponent(JSON.stringify(q,null,1)))), sha:r0.sha};
+    const rr=await fetch(`${API}/contents/cloud/queue.json`,{method:"PUT",
+      headers:{Authorization:"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(!rr.ok){const e=await rr.json().catch(()=>({}));throw new Error(e.message||("HTTP "+rr.status))}
+    btn.textContent=`\u23F3 antecipando "${alvo.name.replace(/-/g," ").slice(0,28)}"...`;
+    watchRun("publish","ig-publish.yml",baseId,btn);
+  }catch(e){ btn.disabled=false; btn.textContent="erro: "+e.message.slice(0,40); }
+}
+
 async function fire(id,btn){
   const t=TRIG[id]; const tok=appTok(); const bot=BOTS[id];
   if(!tok){btn.textContent="configure o token na aba Flows (Configurar acesso)";return}
@@ -357,6 +387,7 @@ async function botInfo(id){
   }catch(e){ h+=row("Erro",e.message,"bad"); }
   let fireHtml="";
   if(TRIG[id]){ fireHtml=`<button class="mfire" style="background:var(--gold);color:#261442" onclick="fire('${id}',this)">\u26A1 Disparar agora \u2014 ${TRIG[id].label}</button>`;
+    if(id==="publish") fireHtml+=`<button class="mfire" style="background:var(--lav);color:#fff" onclick="antecipar(this)">\u23E9 Publicar o PR\u00d3XIMO agora (antecipar)</button><div class="mnote">antecipa o pr\u00f3ximo item da fila para este minuto \u2014 o hor\u00e1rio original \u00e9 substitu\u00eddo</div>`;
     if(TRIG[id].local) fireHtml+=`<div class="mnote">roda no seu PC \u2014 precisa estar ligado (o pc-agent busca pedidos a cada 3 min)</div>`; }
   else if(NOTRIG[id]) fireHtml=`<div class="mnote">${NOTRIG[id]}</div>`;
   box.innerHTML=`<h3>\u{1F916} ${b.n}</h3><div class="desc">${b.d}</div>${h}${fireHtml}<button class="mclose" onclick="document.getElementById('mbg').classList.remove('on')">fechar</button>`;
