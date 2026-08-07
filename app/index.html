@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#150925">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>PG Central</title>
+<style>
+:root{--bg0:#150925;--bg1:#241042;--card:#2b1550;--card2:#231043;--line:#3d2266;--ink:#F3EDFA;--ink2:#B8A6D9;--lav:#A374FF;--gold:#FFD100;--ok:#4ade80;--run:#60a5fa;--warn:#f87171}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:radial-gradient(120% 80% at 20% 0%,var(--bg1),var(--bg0) 70%);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column}
+header{padding:14px 16px 10px;display:flex;align-items:center;gap:10px}
+header .pg{background:var(--gold);color:#261442;border-radius:10px;padding:2px 10px;font-weight:900;font-size:18px}
+header h1{font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:1px}
+header .sub{font-size:10.5px;color:var(--ink2);margin-left:auto;text-align:right}
+nav{display:flex;gap:6px;padding:0 12px 10px;overflow-x:auto}
+nav button{flex:1;min-width:86px;background:var(--card2);border:1px solid var(--line);color:var(--ink2);border-radius:12px;padding:9px 6px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+nav button.on{background:var(--gold);color:#261442;border-color:var(--gold)}
+main{flex:1;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.pane.on{display:block}
+iframe{width:100%;height:100%;border:0}
+/* visao */
+.v{padding:14px 14px 40px;max-width:820px;margin:0 auto}
+.north{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:14px;padding:13px}
+.stat .n{font-family:ui-monospace,Consolas,monospace;font-size:32px;font-weight:800;line-height:1}
+.stat .n.gold{color:var(--gold)}
+.stat .l{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink2);margin-top:5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--lav);font-weight:800;margin-bottom:10px}
+.item{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.item:last-child{border:none}
+.item .q{font-family:ui-monospace,monospace;color:var(--gold);white-space:nowrap}
+.chip{font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;font-weight:800;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.chip.ok{background:rgba(74,222,128,.13);color:var(--ok)}
+.chip.run{background:rgba(96,165,250,.13);color:var(--run)}
+.bots{display:flex;flex-wrap:wrap;gap:6px}
+.bots span{font-size:11px;background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:4px 10px;color:var(--ink2)}
+.bots span.on{border-color:rgba(74,222,128,.5);color:var(--ok)}
+/* diario */
+.d{padding:14px;max-width:820px;margin:0 auto}
+.issue{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;font-size:13.5px;line-height:1.55}
+.issue h3{color:var(--gold);font-size:15px;margin-bottom:8px}
+.issue h4{color:var(--lav);font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px}
+.issue pre{background:#0d0618;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:11px;overflow-x:auto;white-space:pre-wrap;margin:8px 0}
+.issue a{color:var(--lav)}
+.issue b{color:var(--gold)}
+.loading{color:var(--ink2);text-align:center;padding:40px}
+</style>
+</head>
+<body>
+<header>
+  <span class="pg">PG</span><h1>Central</h1>
+  <div class="sub">@papodegentebr<br><span id="hdr">carregando...</span></div>
+</header>
+<nav>
+  <button class="on" data-t="visao">📊 Visão</button>
+  <button data-t="previews">🖼️ Previews</button>
+  <button data-t="flows">💬 Flows</button>
+  <button data-t="diario">🗞️ Diário</button>
+</nav>
+<main>
+  <section class="pane on" id="p-visao"><div class="v" id="visao"><div class="loading">carregando números da nuvem...</div></div></section>
+  <section class="pane" id="p-previews"></section>
+  <section class="pane" id="p-flows"></section>
+  <section class="pane" id="p-diario"><div class="d" id="diario"><div class="loading">carregando pauta e relatórios...</div></div></section>
+</main>
+<script>
+const RAW="https://raw.githubusercontent.com/osantosiqueira96/papodegente-media/main";
+const API="https://api.github.com/repos/osantosiqueira96/papodegente-media";
+const lazy={previews:"../previews/",flows:"../flows/"};
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".pane").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  const t=b.dataset.t;
+  document.getElementById("p-"+t).classList.add("on");
+  if(lazy[t]){ const p=document.getElementById("p-"+t);
+    if(!p.querySelector("iframe")){ const f=document.createElement("iframe"); f.src=lazy[t]; p.appendChild(f); } }
+});
+function md(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/```([\s\S]*?)```/g,(m,c)=>`<pre>${c.trim()}</pre>`)
+    .replace(/^### (.*)$/gm,"<h4>$1</h4>").replace(/^## (.*)$/gm,"<h4>$1</h4>").replace(/^# (.*)$/gm,"<h3>$1</h3>")
+    .replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")
+    .replace(/^\- (.*)$/gm,"• $1")
+    .replace(/(https?:\/\/[^\s<)]+)/g,'<a href="$1" target="_blank">$1</a>')
+    .replace(/\n/g,"<br>");
+}
+async function visao(){
+  try{
+    const [m,q]=await Promise.all([
+      fetch(`${RAW}/cloud/metrics.json?t=${Date.now()}`).then(r=>r.json()),
+      fetch(`${RAW}/cloud/queue.json?t=${Date.now()}`).then(r=>r.json())
+    ]);
+    const pend=q.filter(x=>x.status==="pending").sort((a,b)=>a.when.localeCompare(b.when));
+    const err=q.filter(x=>x.status==="error");
+    const pub=q.filter(x=>x.status==="published");
+    document.getElementById("hdr").textContent=`números de ${m.quando||"?"}`;
+    const top=(m.top5&&m.top5[0])||{};
+    let h=`<div class="north">
+      <div class="stat"><div class="n gold">${m.seguidores??"?"}</div><div class="l">Seguidores ★</div></div>
+      <div class="stat"><div class="n gold">${m.alcance_total??"?"}</div><div class="l">Alcance total ★</div></div>
+      <div class="stat"><div class="n">${m.posts??"?"}</div><div class="l">Posts no ar</div></div>
+      <div class="stat"><div class="n">${top.reach??"?"}</div><div class="l">Post vencedor</div></div>
+    </div>`;
+    h+=`<div class="card"><h2>☁️ Fila da nuvem — ${pend.length} agendado(s) · ${pub.length} publicados · ${err.length} erro(s)</h2>`;
+    for(const it of pend.slice(0,6)){
+      h+=`<div class="item"><span>${it.name.replace(/-/g," ")}</span><span class="q">${it.when.slice(5,16)}</span></div>`;
+    }
+    h+=`</div>`;
+    if(err.length){ h+=`<div class="card"><h2 style="color:var(--warn)">⚠️ Erros</h2>`+err.map(e=>`<div class="item"><span>${e.name}</span><span>${(e.note||"").slice(0,60)}</span></div>`).join("")+`</div>`; }
+    h+=`<div class="card"><h2>🤖 Frota (15 robôs)</h2><div class="bots">
+      <span class="on">publish</span><span class="on">report 8h</span><span class="on">comment-bot</span><span class="on">refresh</span>
+      <span class="on">dashboard 8h34</span><span class="on">planilha 8h50</span><span class="on">trend 7h30</span><span class="on">factory</span>
+      <span class="on">nudger</span><span class="on">analyst 21h30</span><span class="on">story 17h30</span><span class="on">lead-crm</span>
+      <span class="on">pg-builder</span><span>threads (chave)</span><span>radar (token FB)</span></div></div>`;
+    document.getElementById("visao").innerHTML=h;
+  }catch(e){ document.getElementById("visao").innerHTML=`<div class="loading">erro ao carregar: ${e.message}</div>`; }
+}
+async function diario(){
+  try{
+    const is=await fetch(`${API}/issues?state=all&per_page=12&sort=created&direction=desc`).then(r=>r.json());
+    const vistos=new Set(); const picks=[];
+    for(const i of is){
+      const tipo=i.title.startsWith("🗞️")?"pauta":i.title.startsWith("📰")?"relatorio":i.title.startsWith("📈")?"analise":i.title.startsWith("🦫")?"roteiro":null;
+      if(tipo && !vistos.has(tipo)){ vistos.add(tipo); picks.push(i); }
+    }
+    document.getElementById("diario").innerHTML = picks.length
+      ? picks.map(i=>`<div class="issue"><h3>${i.title}</h3>${md(i.body||"")}</div>`).join("")
+      : '<div class="loading">nenhuma edição ainda — a pauta sai 7h30, o relatório 8h</div>';
+  }catch(e){ document.getElementById("diario").innerHTML=`<div class="loading">erro: ${e.message}</div>`; }
+}
+visao(); diario();
+</script>
+</body>
+</html>
