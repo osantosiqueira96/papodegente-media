@@ -106,5 +106,11 @@
         "type":  "reel",
         "when":  "2026-08-14 19:00",
         "status":  "pending"
+    },
+    {
+        "name":  "Reel-16---IA-vs-Gerente",
+        "type":  "reel",
+        "when":  "2026-08-15 19:00",
+        "status":  "pending"
     }
 ]
