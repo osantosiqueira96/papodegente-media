@@ -34,4 +34,4 @@ jobs:
       - name: Andon
         if: failure()
         env: {GH_TOKEN: '${{ github.token }}'}
-        run: gh issue create --repo "${{ github.repository }}" --title "🚨 ANDON story-poster falhou" --body "run ${{ github.run_id }}"
+        run: gh issue create --assignee "osantosiqueira96" --repo "${{ github.repository }}" --title "🚨 ANDON story-poster falhou" --body "run ${{ github.run_id }}"
