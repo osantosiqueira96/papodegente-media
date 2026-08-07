@@ -1,9 +1,30 @@
 {
- "quando": "2026-08-07 09:07",
+ "quando": "2026-08-07 18:09",
  "seguidores": 1,
- "posts": 12,
- "alcance_total": 154,
+ "posts": 15,
+ "alcance_total": 207,
  "ult24h": [
+  {
+   "hora": "07/08 17:44",
+   "tipo": "VIDEO",
+   "reach": 0,
+   "likes": 0,
+   "cap": "Este vídeo foi feito 100% por uma Inteligência Artificial. 🤖"
+  },
+  {
+   "hora": "07/08 14:03",
+   "tipo": "VIDEO",
+   "reach": 49,
+   "likes": 1,
+   "cap": "Aula 1 do Professor PG 🦫: o mito do \"12x sem juros\"  O bolet"
+  },
+  {
+   "hora": "07/08 12:09",
+   "tipo": "IMAGE",
+   "reach": 0,
+   "likes": 0,
+   "cap": "Enquanto você paga juros, alguém recebe. O jogo é esse. 💜  C"
+  },
   {
    "hora": "06/08 22:08",
    "tipo": "VIDEO",
@@ -17,13 +38,6 @@
    "reach": 1,
    "likes": 0,
    "cap": "Por que seu lanche no app custa mais caro? 🍔  Não é impressã"
-  },
-  {
-   "hora": "06/08 12:08",
-   "tipo": "IMAGE",
-   "reach": 1,
-   "likes": 0,
-   "cap": "Você não é ruim com dinheiro. O dinheiro é que é pouco. 💜  4"
   }
  ],
  "top5": [
@@ -33,6 +47,13 @@
    "data": "05/08",
    "cap": "Isso não é autocomplete. É um agente de IA que programa junt",
    "link": "https://www.instagram.com/reel/DbqbT5jlP7m/"
+  },
+  {
+   "reach": 49,
+   "tipo": "VIDEO",
+   "data": "07/08",
+   "cap": "Aula 1 do Professor PG 🦫: o mito do \"12x sem juros\"  O bolet",
+   "link": "https://www.instagram.com/reel/Dbvx9tvoDE6/"
   },
   {
    "reach": 4,
@@ -54,13 +75,6 @@
    "data": "05/08",
    "cap": "Esse carrossel foi feito por IA — do roteiro ao design, sem ",
    "link": "https://www.instagram.com/p/Dbqg-AIoCcv/"
-  },
-  {
-   "reach": 2,
-   "tipo": "CAROUSEL_ALBUM",
-   "data": "05/08",
-   "cap": "Você usa o Nubank de graça — mas ele lucra bilhões. Como? 🟣 ",
-   "link": "https://www.instagram.com/p/Dbqfn8eoPEB/"
   }
  ]
 }
