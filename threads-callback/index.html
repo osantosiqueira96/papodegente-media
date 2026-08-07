@@ -1,0 +1,10 @@
+<!doctype html><html lang="pt-br"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Threads — código de autorização</title>
+<style>body{font-family:system-ui;background:#111;color:#eee;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
+.card{background:#1d1d1f;border-radius:16px;padding:32px;max-width:640px;text-align:center}
+code{display:block;background:#000;color:#7ee787;padding:16px;border-radius:10px;word-break:break-all;margin:16px 0;font-size:14px}
+button{background:#7C3AED;color:#fff;border:0;padding:12px 24px;border-radius:10px;font-size:16px;cursor:pointer}
+</style></head><body><div class="card"><h2>🧵 Código de autorização do Threads</h2>
+<p>Copia o código abaixo e cola no chat do Claude:</p><code id="c">aguardando...</code>
+<button onclick="navigator.clipboard.writeText(document.getElementById('c').textContent)">📋 Copiar</button>
+<script>const p=new URLSearchParams(location.search);document.getElementById('c').textContent=p.get('code')||'(nenhum código na URL — refaça o login)';</script>
+</div></body></html>
