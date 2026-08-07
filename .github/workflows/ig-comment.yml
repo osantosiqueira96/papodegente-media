@@ -1,0 +1,59 @@
+name: IG Comment Bot
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'cloud/flows.json'
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: ig-comment
+  cancel-in-progress: false
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Rodar fluxos
+        id: bot
+        run: python cloud/commentbot.py
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+      - name: Commit estado
+        if: always()
+        run: |
+          git config user.name "ig-bot"
+          git config user.email "ig-bot@users.noreply.github.com"
+          git add cloud/bot_state.json
+          if git diff --cached --quiet; then echo "sem mudancas"; exit 0; fi
+          git commit -m "bot: estado [skip ci]"
+          for i in 1 2 3; do
+            git pull --rebase origin ${{ github.ref_name }} && git push && exit 0
+            sleep 4
+          done
+          exit 1
+      - name: Andon — alerta de falha
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ steps.bot.outcome }}" = "failure" ] || [ -f cloud/_alert.txt ]; then
+            DET="bot falhou"
+            [ -f cloud/_alert.txt ] && DET=$(tr '\n' ' | ' < cloud/_alert.txt)
+            gh issue create --repo "${{ github.repository }}" \
+              --title "🔴 ANDON: comment-bot com erro" \
+              --body "Detalhe: $DET — Log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          else
+            echo "sem falhas"
+          fi
