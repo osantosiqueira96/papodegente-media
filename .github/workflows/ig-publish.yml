@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: ig-publish
@@ -21,11 +22,13 @@ jobs:
           python-version: '3.12'
       - run: pip install requests
       - name: Publicar vencidos
+        id: pub
         run: python cloud/publish.py
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_TOKEN: ${{ secrets.IG_TOKEN }}
       - name: Commit queue atualizada
+        if: always()
         run: |
           git config user.name "ig-bot"
           git config user.email "ig-bot@users.noreply.github.com"
@@ -33,3 +36,17 @@ jobs:
           git diff --cached --quiet || git commit -m "queue: status update [skip ci]"
           git pull --rebase origin ${{ github.ref_name }} || true
           git push
+      - name: Andon — alerta de falha (issue -> e-mail)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ steps.pub.outcome }}" = "failure" ] || [ -f cloud/_alert.txt ]; then
+            DET="robo falhou antes de publicar"
+            [ -f cloud/_alert.txt ] && DET=$(tr '\n' ' | ' < cloud/_alert.txt)
+            gh issue create --repo "${{ github.repository }}" \
+              --title "🔴 ANDON: falha na publicação automática" \
+              --body "Detalhe: $DET — Log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          else
+            echo "sem falhas — andon quieto"
+          fi
