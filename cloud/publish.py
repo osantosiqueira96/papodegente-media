@@ -14,6 +14,10 @@ import requests
 API = "https://graph.instagram.com/v21.0"
 IG = os.environ["IG_USER_ID"]
 TOKEN = os.environ["IG_TOKEN"]
+# Threads (espelhamento automatico) — dormente ate os secrets existirem
+TH_API = "https://graph.threads.net/v1.0"
+TH_USER = os.environ.get("THREADS_USER_ID", "")
+TH_TOKEN = os.environ.get("THREADS_TOKEN", "")
 REPO = os.environ.get("GITHUB_REPOSITORY", "osantosiqueira96/papodegente-media")
 BRANCH = os.environ.get("GITHUB_REF_NAME", "main")
 RAW = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}"
@@ -82,6 +86,51 @@ def publish_reel(folder):
     wait_ready(cid, tries=60, sleep=10)
     return api_post(f"{IG}/media_publish", {"creation_id": cid})["id"]
 
+def threads_mirror(folder, typ):
+    """Espelha o post no Threads (texto ate 500 + midia). Nunca bloqueia o IG."""
+    if not (TH_USER and TH_TOKEN):
+        return None
+    try:
+        text = caption_of(folder)[:480]
+        data = {"access_token": TH_TOKEN, "text": text}
+        if typ == "reel":
+            mp4s = glob.glob(os.path.join(ROOT, "posts", folder, "*.mp4"))
+            if not mp4s:
+                return None
+            data.update({"media_type": "VIDEO",
+                         "video_url": f"{RAW}/cloud/posts/{folder}/{os.path.basename(mp4s[0])}"})
+            tries, pause = 40, 8
+        else:
+            slides = sorted(glob.glob(os.path.join(ROOT, "posts", folder, "slide*.jpg")))
+            if slides:
+                data.update({"media_type": "IMAGE",
+                             "image_url": f"{RAW}/cloud/posts/{folder}/{os.path.basename(slides[0])}"})
+            else:
+                data["media_type"] = "TEXT"
+            tries, pause = 20, 5
+        r = requests.post(f"{TH_API}/{TH_USER}/threads", data=data, timeout=120)
+        if r.status_code >= 400:
+            raise RuntimeError(r.text[:200])
+        cid = r.json()["id"]
+        for _ in range(tries):
+            st = requests.get(f"{TH_API}/{cid}", params={"fields": "status",
+                              "access_token": TH_TOKEN}, timeout=60).json().get("status")
+            if st == "FINISHED":
+                break
+            if st == "ERROR":
+                raise RuntimeError("container ERROR")
+            time.sleep(pause)
+        r2 = requests.post(f"{TH_API}/{TH_USER}/threads_publish",
+                           data={"creation_id": cid, "access_token": TH_TOKEN}, timeout=120)
+        if r2.status_code >= 400:
+            raise RuntimeError(r2.text[:200])
+        tid = r2.json().get("id")
+        print(f"    THREADS OK id={tid}")
+        return tid
+    except Exception as e:
+        print(f"    THREADS falhou (IG nao afetado): {e}")
+        return None
+
 def main():
     if not os.path.exists(QUEUE):
         print("sem queue.json — nada a fazer")
@@ -105,6 +154,9 @@ def main():
             item["post_id"] = post_id
             item["published_at"] = now.strftime("%Y-%m-%d %H:%M")
             print(f"    OK id={post_id}")
+            tid = threads_mirror(name, typ)
+            if tid:
+                item["threads_id"] = tid
         except Exception as e:
             item["status"] = "error"
             item["note"] = str(e)[:200]
