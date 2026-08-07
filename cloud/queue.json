@@ -1,92 +1,92 @@
 [
-    {
-        "name":  "Reel-09---Conta-de-Luz",
-        "type":  "reel",
-        "when":  "2026-08-10 12:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-10---Nome-Limpo",
-        "type":  "reel",
-        "when":  "2026-08-11 19:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-11---Pix-Automatico",
-        "type":  "reel",
-        "when":  "2026-08-12 19:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-12---Consignado",
-        "type":  "reel",
-        "when":  "2026-08-13 19:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Estatico-02---Selic",
-        "type":  "photo",
-        "when":  "2026-08-07 12:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Carrossel-09---Selic",
-        "type":  "carousel",
-        "when":  "2026-08-07 19:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-04---FGTS-lucro",
-        "type":  "reel",
-        "when":  "2026-08-07 21:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Estatico-03---Golpe-Pix",
-        "type":  "photo",
-        "when":  "2026-08-08 12:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Carrossel-10---Golpes-Pix",
-        "type":  "carousel",
-        "when":  "2026-08-08 19:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-05---Golpe-Pix",
-        "type":  "reel",
-        "when":  "2026-08-08 21:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-06---Imposto",
-        "type":  "reel",
-        "when":  "2026-08-09 12:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-07---Inflacao",
-        "type":  "reel",
-        "when":  "2026-08-09 18:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-08---Pra-onde-vai-imposto",
-        "type":  "reel",
-        "when":  "2026-08-09 21:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-13---Feito-por-IA",
-        "type":  "reel",
-        "when":  "2026-08-10 19:00",
-        "status":  "pending"
-    },
-    {
-        "name":  "Reel-14---IA-de-graca",
-        "type":  "reel",
-        "when":  "2026-08-12 12:00",
-        "status":  "pending"
-    }
+ {
+  "name": "Reel-09---Conta-de-Luz",
+  "type": "reel",
+  "when": "2026-08-10 12:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-10---Nome-Limpo",
+  "type": "reel",
+  "when": "2026-08-11 19:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-11---Pix-Automatico",
+  "type": "reel",
+  "when": "2026-08-12 19:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-12---Consignado",
+  "type": "reel",
+  "when": "2026-08-13 19:00",
+  "status": "pending"
+ },
+ {
+  "name": "Estatico-02---Selic",
+  "type": "photo",
+  "when": "2026-08-07 12:00",
+  "status": "pending"
+ },
+ {
+  "name": "Carrossel-09---Selic",
+  "type": "carousel",
+  "when": "2026-08-07 19:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-04---FGTS-lucro",
+  "type": "reel",
+  "when": "2026-08-07 21:00",
+  "status": "pending"
+ },
+ {
+  "name": "Estatico-03---Golpe-Pix",
+  "type": "photo",
+  "when": "2026-08-08 12:00",
+  "status": "pending"
+ },
+ {
+  "name": "Carrossel-10---Golpes-Pix",
+  "type": "carousel",
+  "when": "2026-08-08 19:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-05---Golpe-Pix",
+  "type": "reel",
+  "when": "2026-08-08 21:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-06---Imposto",
+  "type": "reel",
+  "when": "2026-08-09 12:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-07---Inflacao",
+  "type": "reel",
+  "when": "2026-08-09 18:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-08---Pra-onde-vai-imposto",
+  "type": "reel",
+  "when": "2026-08-09 21:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-13---Feito-por-IA",
+  "type": "reel",
+  "when": "2026-08-07 15:00",
+  "status": "pending"
+ },
+ {
+  "name": "Reel-14---IA-de-graca",
+  "type": "reel",
+  "when": "2026-08-12 12:00",
+  "status": "pending"
+ }
 ]
