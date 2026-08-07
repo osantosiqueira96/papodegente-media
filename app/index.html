@@ -171,11 +171,11 @@ async function visao(){
     h+=`</div>`;
     if(err.length){ h+=`<div class="card"><h2 style="color:var(--warn)">⚠️ Erros</h2>`+err.map(e=>`<div class="item"><span>${e.name}</span><span>${(e.note||"").slice(0,60)}</span></div>`).join("")+`</div>`; }
     h+=await cotas();
-    h+=`<div class="card"><h2>🤖 Frota (17 robôs) — toque para ver a última atividade</h2><div class="bots" id="bots">
+    h+=`<div class="card"><h2>🤖 Frota (18 robôs) — toque para ver a última atividade</h2><div class="bots" id="bots">
       <span class="on" data-b="publish">publish</span><span class="on" data-b="report">report 8h</span><span class="on" data-b="comment">comment-bot</span><span class="on" data-b="refresh">refresh</span>
       <span class="on" data-b="dashboard">dashboard 8h34</span><span class="on" data-b="planilha">planilha 8h50</span><span class="on" data-b="trend">trend 7h30</span><span class="on" data-b="factory">factory</span>
       <span class="on" data-b="nudger">nudger</span><span class="on" data-b="analyst">analyst 21h30</span><span class="on" data-b="story">story 17h30</span><span class="on" data-b="leadcrm">lead-crm</span>
-      <span class="on" data-b="pgbuilder">pg-builder</span><span class="on" data-b="kaizen">kaizen 22h</span><span class="on" data-b="pcagent">pc-agent</span><span data-b="threads">threads (chave)</span><span data-b="radar">radar (token FB)</span></div></div>`;
+      <span class="on" data-b="pgbuilder">pg-builder</span><span class="on" data-b="kaizen">kaizen 22h</span><span class="on" data-b="pcagent">pc-agent</span><span class="on" data-b="faxina">faxina</span><span data-b="threads">threads (chave)</span><span data-b="radar">radar (token FB)</span></div></div>`;
     document.getElementById("visao").innerHTML=h;
   }catch(e){ document.getElementById("visao").innerHTML=`<div class="loading">erro ao carregar: ${e.message}</div>`; }
 }
@@ -196,6 +196,7 @@ const BOTS={
  nudger:{n:"publish-nudger",d:"Cutuca o publicador se o GitHub atrasar (20/20min, PC ligado)",hb:"nudger"},
  pgbuilder:{n:"pg-builder",d:"Monta o reel do Professor PG a partir da inbox (30/30min, PC)",hb:"pg-builder"},
  kaizen:{n:"agente-kaizen",d:"Ciclo kaizen 22h: evidencia vira registro (positiva/negativa/lean)",wf:"ig-kaizen.yml",extra:"kaizen"},
+ faxina:{n:"faxina",d:"Domingo 3h: posts publicados ha +30 dias viram miniatura (repo leve)",wf:"ig-faxina.yml"},
  pcagent:{n:"pc-agent",d:"Ponte web->PC: executa os robos locais que voce dispara aqui",static:"roda no seu PC a cada 3 min (tarefa do Windows)"},
  threads:{n:"threads-mirror",d:"Espelha cada post no Threads",static:"DORMENTE - aguardando a chave secreta do Threads"}
 };
@@ -212,6 +213,7 @@ const TRIG={
  leadcrm:{recommit:"cloud/flows.json",wf:"ig-comment.yml",label:"varrer e registrar leads agora"},
  refresh:{path:"cloud/refresh_nudge.txt",label:"renovar o token agora"},
  factory:{path:"factory/nudge.txt",label:"processar as specs pendentes agora"},
+ faxina:{path:"cloud/faxina_nudge.txt",label:"arquivar midia antiga agora"},
  kaizen:{path:"cloud/kaizen_nudge.txt",label:"rodar o ciclo kaizen agora"},
  radar:{path:"cloud/competitor_nudge.txt",label:"espiar os perfis do radar agora"},
  planilha:{local:"planilha",label:"atualizar a planilha agora"},
