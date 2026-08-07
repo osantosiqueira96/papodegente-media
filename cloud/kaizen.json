@@ -1,0 +1,37 @@
+{
+ "entradas": [
+  {
+   "id": "pos-recorde-140",
+   "data": "2026-08-07",
+   "tipo": "positiva",
+   "titulo": "Recorde de alcance: 140",
+   "evidencia": "Maior alcance ja registrado no perfil (140).",
+   "acao": "Replicar o formato/angulo do post recordista nas proximas pecas.",
+   "status": "OK"
+  },
+  {
+   "id": "lean-nudger-2026-08-07",
+   "data": "2026-08-07",
+   "tipo": "lean",
+   "titulo": "Espera: o agendador do GitHub atrasou a publicacao",
+   "evidencia": "O nudger precisou intervir hoje (cutucou o publicador: 1 post(s) vencido(s)).",
+   "acao": "Nudger no PC (20/20min) + botao de disparo no app ja cobrem. Se repetir muito, encurtar o cron.",
+   "status": "Em execucao"
+  },
+  {
+   "id": "pos-reelsfirst-2026-08-07",
+   "data": "2026-08-07",
+   "tipo": "positiva",
+   "titulo": "Reels-first confirmado pelos numeros",
+   "evidencia": "Alcance medio: reels 39.4 vs demais 1.1 (35.8x).",
+   "acao": "Manter reels como formato principal da esteira.",
+   "status": "OK"
+  }
+ ],
+ "ids": [
+  "lean-nudger-2026-08-07",
+  "pos-recorde-140",
+  "pos-reelsfirst-2026-08-07"
+ ],
+ "atualizado": "2026-08-07 18:42"
+}
