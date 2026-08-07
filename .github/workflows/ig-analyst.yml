@@ -1,0 +1,53 @@
+name: IG Engagement Analyst
+on:
+  push:
+    paths: ['cloud/analyst_nudge.txt']
+  schedule:
+    - cron: '30 0 * * *'   # 21:30 Brasília (dia anterior)
+    - cron: '50 0 * * *'   # retry
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Anti-duplicata
+        id: guard
+        run: |
+          HOJE=$(TZ=America/Sao_Paulo date +%Y-%m-%d)
+          if [ "${{ github.event_name }}" != "schedule" ]; then echo "done=false" >> $GITHUB_OUTPUT; exit 0; fi
+          if grep -q "\"$HOJE\"" cloud/analysis.json 2>/dev/null; then echo "done=true" >> $GITHUB_OUTPUT; else echo "done=false" >> $GITHUB_OUTPUT; fi
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.done != 'true'
+        with: {python-version: '3.12'}
+      - run: pip install requests
+        if: steps.guard.outputs.done != 'true'
+      - name: Analisar
+        if: steps.guard.outputs.done != 'true'
+        run: python cloud/analyst.py
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+      - name: Commit
+        if: steps.guard.outputs.done != 'true'
+        run: |
+          git config user.name "ig-analyst"; git config user.email "ig-bot@users.noreply.github.com"
+          git add cloud/analysis.json cloud/analysis.md
+          git diff --cached --quiet || git commit -m "analyst: snapshot [skip ci]"
+          for i in 1 2 3; do git pull --rebase origin ${{ github.ref_name }} && git push && break || sleep 4; done
+      - name: Issue (domingo ou recorde)
+        if: steps.guard.outputs.done != 'true' && hashFiles('cloud/_issue_analyst.txt') != ''
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh issue create --repo "${{ github.repository }}" \
+            --title "📈 Análise de engajamento — $(TZ=America/Sao_Paulo date +%d/%m/%Y)" \
+            --body-file cloud/_issue_analyst.txt
+      - name: Andon
+        if: failure()
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh issue create --repo "${{ github.repository }}" --title "🚨 ANDON analyst falhou" --body "run ${{ github.run_id }}"
