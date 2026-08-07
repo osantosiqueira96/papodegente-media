@@ -51,6 +51,21 @@ iframe{width:100%;height:100%;border:0}
 .issue a{color:var(--lav)}
 .issue b{color:var(--gold)}
 .loading{color:var(--ink2);text-align:center;padding:40px}
+.bots span{cursor:pointer}
+.bots span:active{transform:scale(.96)}
+.modal-bg{position:fixed;inset:0;background:rgba(10,4,24,.75);backdrop-filter:blur(3px);display:none;z-index:50;align-items:flex-end;justify-content:center}
+.modal-bg.on{display:flex}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:18px 18px 0 0;padding:18px 16px 26px;width:100%;max-width:560px;max-height:75vh;overflow-y:auto}
+@media(min-width:600px){.modal-bg.on{align-items:center}.modal{border-radius:18px}}
+.modal h3{color:var(--gold);font-size:15px;margin-bottom:2px}
+.modal .desc{font-size:11.5px;color:var(--ink2);margin-bottom:12px}
+.mrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.mrow:last-child{border:none}
+.mrow .k{color:var(--ink2);font-size:11px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+.mrow .v{text-align:right;word-break:break-word}
+.v.ok{color:var(--ok)} .v.bad{color:var(--warn)} .v.gold{color:var(--gold)}
+.mclose{margin-top:14px;width:100%;background:var(--card2);border:1px solid var(--line);color:var(--ink2);border-radius:12px;padding:10px;font-weight:800;cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -70,6 +85,7 @@ iframe{width:100%;height:100%;border:0}
   <section class="pane" id="p-flows"></section>
   <section class="pane" id="p-diario"><div class="d" id="diario"><div class="loading">carregando pauta e relatórios...</div></div></section>
 </main>
+<div class="modal-bg" id="mbg" onclick="if(event.target===this)this.classList.remove('on')"><div class="modal" id="mbox"></div></div>
 <script>
 const RAW="https://raw.githubusercontent.com/osantosiqueira96/papodegente-media/main";
 const API="https://api.github.com/repos/osantosiqueira96/papodegente-media";
@@ -115,14 +131,95 @@ async function visao(){
     }
     h+=`</div>`;
     if(err.length){ h+=`<div class="card"><h2 style="color:var(--warn)">⚠️ Erros</h2>`+err.map(e=>`<div class="item"><span>${e.name}</span><span>${(e.note||"").slice(0,60)}</span></div>`).join("")+`</div>`; }
-    h+=`<div class="card"><h2>🤖 Frota (15 robôs)</h2><div class="bots">
-      <span class="on">publish</span><span class="on">report 8h</span><span class="on">comment-bot</span><span class="on">refresh</span>
-      <span class="on">dashboard 8h34</span><span class="on">planilha 8h50</span><span class="on">trend 7h30</span><span class="on">factory</span>
-      <span class="on">nudger</span><span class="on">analyst 21h30</span><span class="on">story 17h30</span><span class="on">lead-crm</span>
-      <span class="on">pg-builder</span><span>threads (chave)</span><span>radar (token FB)</span></div></div>`;
+    h+=`<div class="card"><h2>🤖 Frota (15 robôs) — toque para ver a última atividade</h2><div class="bots" id="bots">
+      <span class="on" data-b="publish">publish</span><span class="on" data-b="report">report 8h</span><span class="on" data-b="comment">comment-bot</span><span class="on" data-b="refresh">refresh</span>
+      <span class="on" data-b="dashboard">dashboard 8h34</span><span class="on" data-b="planilha">planilha 8h50</span><span class="on" data-b="trend">trend 7h30</span><span class="on" data-b="factory">factory</span>
+      <span class="on" data-b="nudger">nudger</span><span class="on" data-b="analyst">analyst 21h30</span><span class="on" data-b="story">story 17h30</span><span class="on" data-b="leadcrm">lead-crm</span>
+      <span class="on" data-b="pgbuilder">pg-builder</span><span data-b="threads">threads (chave)</span><span data-b="radar">radar (token FB)</span></div></div>`;
     document.getElementById("visao").innerHTML=h;
   }catch(e){ document.getElementById("visao").innerHTML=`<div class="loading">erro ao carregar: ${e.message}</div>`; }
 }
+
+const BOTS={
+ publish:{n:"ig-publish",d:"Publica a fila no Instagram (+Threads) a cada 30min",wf:"ig-publish.yml",extra:"lastPub"},
+ report:{n:"ig-report",d:"Relatorio diario 8h por e-mail (3 tentativas + anti-duplicata)",wf:"ig-report.yml",extra:"metrics"},
+ comment:{n:"comment-bot",d:"Palavra-gatilho: resposta + DM (edite no Flows)",wf:"ig-comment.yml",extra:"botstate"},
+ refresh:{n:"ig-refresh",d:"Renova o token do IG a cada 20 dias",wf:"ig-refresh.yml"},
+ trend:{n:"trend-scout",d:"Pauta do dia 7h30 (Trends BR + G1 + roteiro do Professor PG)",wf:"ig-trend.yml",extra:"pauta"},
+ factory:{n:"content-factory",d:"Renderiza estaticos/carrosseis na nuvem por spec",wf:"ig-factory.yml"},
+ analyst:{n:"engagement-analyst",d:"Analise diaria 21h30; e-mail domingo/recorde",wf:"ig-analyst.yml",extra:"analysis"},
+ story:{n:"story-poster",d:"Story do melhor post, todo dia 17h30",wf:"ig-story.yml",extra:"story"},
+ radar:{n:"competitor-watch",d:"Radar dos perfis-referencia (dormente: aguarda token FB)",wf:"ig-competitor.yml"},
+ leadcrm:{n:"lead-crm",d:"Registra todo lead (EU QUERO) em leads.csv",extra:"leads",static:"acoplado ao comment-bot"},
+ dashboard:{n:"dashboard-agent",d:"Rotina Claude na nuvem, 8h34, atualiza o dashboard",static:"roda no claude.ai (rotinas) - resultado visivel no dashboard"},
+ planilha:{n:"rotina-planilha",d:"Atualiza a planilha de controle as 8h50 (ou ao ligar o PC)",hb:"planilha"},
+ nudger:{n:"publish-nudger",d:"Cutuca o publicador se o GitHub atrasar (20/20min, PC ligado)",hb:"nudger"},
+ pgbuilder:{n:"pg-builder",d:"Monta o reel do Professor PG a partir da inbox (30/30min, PC)",hb:"pg-builder"},
+ threads:{n:"threads-mirror",d:"Espelha cada post no Threads",static:"DORMENTE - aguardando a chave secreta do Threads"}
+};
+const fmtBR=iso=>{try{return new Date(iso).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}catch(e){return iso}};
+function row(k,v,cls){return `<div class="mrow"><span class="k">${k}</span><span class="v ${cls||""}">${v}</span></div>`}
+async function botInfo(id){
+  const b=BOTS[id]; const box=document.getElementById("mbox");
+  box.innerHTML=`<h3>\u{1F916} ${b.n}</h3><div class="desc">${b.d}</div><div class="loading">consultando...</div>`;
+  document.getElementById("mbg").classList.add("on");
+  let h="";
+  try{
+    if(b.wf){
+      const r=await fetch(`${API}/actions/workflows/${b.wf}/runs?per_page=1`).then(x=>x.json());
+      const run=(r.workflow_runs||[])[0];
+      if(run){
+        h+=row("Ultima execucao",fmtBR(run.created_at),"gold");
+        h+=row("Resultado",run.conclusion==="success"?"\u2713 sucesso":(run.conclusion||run.status),run.conclusion==="success"?"ok":"bad");
+        h+=row("Disparo",run.event==="schedule"?"\u23F0 agendado":run.event==="push"?"\u26A1 manual/nudge":run.event);
+      } else h+=row("Execucoes","nenhuma ainda");
+    }
+    if(b.hb){
+      try{const hb=await fetch(`${RAW}/heartbeats/${b.hb}.json?t=${Date.now()}`).then(x=>{if(!x.ok)throw 0;return x.json()});
+        h+=row("Ultima atividade",fmtBR(hb.quando),"gold")+row("Resultado",hb.resultado,"ok");
+      }catch(e){h+=row("Ultima atividade","ainda sem registro (1o batimento em breve)")}
+    }
+    if(b.extra==="lastPub"){
+      const q=await fetch(`${RAW}/cloud/queue.json?t=${Date.now()}`).then(x=>x.json());
+      const pubs=q.filter(x=>x.status==="published"&&x.published_at).sort((a,b)=>b.published_at.localeCompare(a.published_at));
+      if(pubs[0]) h+=row("Ultimo post publicado",`${pubs[0].name.replace(/-/g," ")}<br>as ${pubs[0].published_at.slice(11)}`,"ok");
+      const err=q.filter(x=>x.status==="error"); if(err.length) h+=row("Erros na fila",err.length,"bad");
+    }
+    if(b.extra==="metrics"){
+      const m=await fetch(`${RAW}/cloud/metrics.json?t=${Date.now()}`).then(x=>x.json());
+      h+=row("Numeros coletados em",m.quando,"ok")+row("Snapshot",`${m.seguidores} seguidor(es) \u00B7 ${m.alcance_total} alcance`);
+    }
+    if(b.extra==="botstate"){
+      const st=await fetch(`${RAW}/cloud/bot_state.json?t=${Date.now()}`).then(x=>x.json());
+      h+=row("Comentarios processados",(st.processed||[]).length,(st.processed||[]).length?"ok":"");
+      h+=row("Obs","0 = modo dev esconde comentarios (falta testador/Live)");
+    }
+    if(b.extra==="pauta"){
+      const is=await fetch(`${API}/issues?state=all&per_page=10`).then(x=>x.json());
+      const p=(is||[]).find(i=>i.title.startsWith("\u{1F5DE}"));
+      if(p) h+=row("Ultima pauta",p.title,"ok");
+    }
+    if(b.extra==="analysis"){
+      const a=await fetch(`${RAW}/cloud/analysis.json?t=${Date.now()}`).then(x=>x.json());
+      const dias=Object.keys(a.dias||{}).sort(); const ult=dias[dias.length-1];
+      h+=row("Ultimo snapshot",ult,"ok")+row("Recorde de alcance",a.recorde,"gold");
+    }
+    if(b.extra==="story"){
+      const st=await fetch(`${RAW}/cloud/story_state.json?t=${Date.now()}`).then(x=>x.json());
+      h+=row("Ultimo story",st.last_date||"-",st.last_date?"ok":"")+row("ID",st.last_story||"-");
+    }
+    if(b.extra==="leads"){
+      try{const csv=await fetch(`${RAW}/cloud/leads.csv?t=${Date.now()}`).then(x=>{if(!x.ok)throw 0;return x.text()});
+        const lines=csv.trim().split("\n").slice(1);
+        h+=row("Leads registrados",lines.length,lines.length?"gold":"");
+        if(lines.length){const u=lines[lines.length-1].split(";");h+=row("Ultimo lead",`@${u[2]} (${u[1]})`,"ok")}
+      }catch(e){h+=row("Leads registrados","0 (o funil abre com o 1o EU QUERO visivel)")}
+    }
+    if(b.static) h+=row("Estado",b.static);
+  }catch(e){ h+=row("Erro",e.message,"bad"); }
+  box.innerHTML=`<h3>\u{1F916} ${b.n}</h3><div class="desc">${b.d}</div>${h}<button class="mclose" onclick="document.getElementById('mbg').classList.remove('on')">fechar</button>`;
+}
+
 async function diario(){
   try{
     const is=await fetch(`${API}/issues?state=all&per_page=12&sort=created&direction=desc`).then(r=>r.json());
@@ -136,7 +233,7 @@ async function diario(){
       : '<div class="loading">nenhuma edição ainda — a pauta sai 7h30, o relatório 8h</div>';
   }catch(e){ document.getElementById("diario").innerHTML=`<div class="loading">erro: ${e.message}</div>`; }
 }
-visao(); diario();
+visao().then(()=>{const el=document.getElementById("bots");if(el)el.addEventListener("click",e=>{const t=e.target.closest("[data-b]");if(t)botInfo(t.dataset.b)})}); diario();
 </script>
 </body>
 </html>
