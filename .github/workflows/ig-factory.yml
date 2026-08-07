@@ -41,6 +41,6 @@ jobs:
         run: |
           BODY="Ver logs da execução ${{ github.run_id }}."
           if [ -f cloud/_alert.txt ]; then BODY=$(cat cloud/_alert.txt); fi
-          gh issue create --repo "${{ github.repository }}" \
+          gh issue create --assignee "osantosiqueira96" --repo "${{ github.repository }}" \
             --title "🚨 ANDON content-factory — $(TZ=America/Sao_Paulo date '+%d/%m %H:%M')" \
             --body "$BODY"
