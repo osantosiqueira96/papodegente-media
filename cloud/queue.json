@@ -46,5 +46,11 @@
         "type":  "photo",
         "when":  "2026-08-08 12:00",
         "status":  "pending"
+    },
+    {
+        "name":  "Carrossel-10---Golpes-Pix",
+        "type":  "carousel",
+        "when":  "2026-08-08 19:00",
+        "status":  "pending"
     }
 ]
