@@ -82,7 +82,7 @@
     {
         "name":  "Reel-13---Feito-por-IA",
         "type":  "reel",
-        "when":  "2026-08-07 15:00",
+        "when":  "2026-08-07 17:00",
         "status":  "pending"
     },
     {
@@ -118,7 +118,7 @@
     {
         "name":  "Reel-17---Professor-PG-01---Sem-Juros",
         "type":  "reel",
-        "when":  "2026-08-08 15:00",
+        "when":  "2026-08-07 14:00",
         "status":  "pending"
     }
 ]
