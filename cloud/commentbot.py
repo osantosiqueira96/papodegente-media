@@ -67,7 +67,7 @@ def main():
     seen = set(state["processed"])
     acted = 0; errs = []
 
-    media = get(f"{IG}/media", {"fields": "id,timestamp", "limit": 10}).get("data", [])
+    media = get(f"{IG}/media", {"fields": "id,timestamp", "limit": 5}).get("data", [])
     for m in media:
         if acted >= maxact: break
         try:
