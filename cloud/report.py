@@ -75,5 +75,13 @@ L.append("- Impedimentos/soluções: ver abas Lean + Negativas/Postiva da planil
 L.append("- Próxima ação guiada por números: replicar o formato do vencedor acima.")
 
 open(os.path.join(ROOT,"report.md"),"w",encoding="utf-8").write("\n".join(L)+"\n")
-print("report.md gerado")
+# metrics.json: fonte de dados publica pro dashboard diario
+snap={"quando":now.strftime("%Y-%m-%d %H:%M"),"seguidores":prof["followers_count"],
+      "posts":prof["media_count"],"alcance_total":sum(p["reach"] for p in posts),
+      "ult24h":[{"hora":p["quando"].strftime("%d/%m %H:%M"),"tipo":p["tipo"],"reach":p["reach"],
+                 "likes":p["likes"],"cap":p["cap"]} for p in h24],
+      "top5":[{"reach":p["reach"],"tipo":p["tipo"],"data":p["quando"].strftime("%d/%m"),
+               "cap":p["cap"],"link":p["link"]} for p in rank]}
+json.dump(snap, open(os.path.join(ROOT,"metrics.json"),"w",encoding="utf-8"), ensure_ascii=False, indent=1)
+print("report.md + metrics.json gerados")
 print("\n".join(L[:12]))
