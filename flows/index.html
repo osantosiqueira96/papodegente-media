@@ -182,14 +182,12 @@ async function loadComps(){
     if(!r.ok)return;
     const j=await r.json(); csha=j.sha;
     const d=JSON.parse(b64dec(j.content));
-    document.getElementById("comps").value=(d.perfis||[]).join("
-");
+    document.getElementById("comps").value=(d.perfis||[]).join(String.fromCharCode(10));
   }catch(e){}
 }
 async function saveComps(){
   if(!tok()){document.getElementById("tokbox").open=true;return toast("configura o token primeiro",1)}
-  const perfis=document.getElementById("comps").value.split("
-").map(s=>s.trim().replace(/^@/,"")).filter(Boolean);
+  const perfis=document.getElementById("comps").value.split(/\r?\n/).map(s=>s.trim().replace(/^@/,"")).filter(Boolean);
   try{
     const r0=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${CPATH}?t=${Date.now()}`,{headers:{Authorization:"Bearer "+tok()}});
     if(r0.ok){csha=(await r0.json()).sha}
