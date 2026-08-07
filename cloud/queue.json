@@ -1,6 +1,14 @@
-{
-    "name":  "Reel-09---Conta-de-Luz",
-    "type":  "reel",
-    "when":  "2026-08-10 12:00",
-    "status":  "pending"
-}
+[
+    {
+        "name":  "Reel-09---Conta-de-Luz",
+        "type":  "reel",
+        "when":  "2026-08-10 12:00",
+        "status":  "pending"
+    },
+    {
+        "name":  "Reel-10---Nome-Limpo",
+        "type":  "reel",
+        "when":  "2026-08-11 19:00",
+        "status":  "pending"
+    }
+]
