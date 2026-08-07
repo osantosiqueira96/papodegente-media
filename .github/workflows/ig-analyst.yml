@@ -44,10 +44,12 @@ jobs:
         if: steps.guard.outputs.done != 'true' && hashFiles('cloud/_issue_analyst.txt') != ''
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
-          gh issue create --repo "${{ github.repository }}" \
+          echo "" >> cloud/_issue_analyst.txt
+          echo "cc @osantosiqueira96" >> cloud/_issue_analyst.txt
+          gh issue create --assignee "osantosiqueira96" --repo "${{ github.repository }}" \
             --title "📈 Análise de engajamento — $(TZ=America/Sao_Paulo date +%d/%m/%Y)" \
             --body-file cloud/_issue_analyst.txt
       - name: Andon
         if: failure()
         env: {GH_TOKEN: '${{ github.token }}'}
-        run: gh issue create --repo "${{ github.repository }}" --title "🚨 ANDON analyst falhou" --body "run ${{ github.run_id }}"
+        run: gh issue create --assignee "osantosiqueira96" --repo "${{ github.repository }}" --title "🚨 ANDON analyst falhou" --body "run ${{ github.run_id }}"
