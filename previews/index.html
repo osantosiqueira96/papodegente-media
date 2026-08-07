@@ -65,7 +65,7 @@ video.media{aspect-ratio:9/16;max-height:380px}
 </head>
 <body>
 <div class="wrap">
-  <a class="voltar" href="../app/" id="btvoltar">‹ PG Central</a>
+  <a class="voltar" href="https://osantosiqueira96.github.io/papodegente-media/app/" id="btvoltar">‹ PG Central</a>
   <div class="eyebrow">SS Dark · como o perfil vai ficar</div>
   <h1><span class="pg">PG</span> Previews</h1>
   <div class="sub" id="resumo">carregando a fila da nuvem...</div>
@@ -110,13 +110,18 @@ function thumbSrc(it){
   return it.type==="reel" ? `${RAW}/cloud/posts/${it.name}/REEL_pronto.mp4#t=1`
                           : `${RAW}/cloud/posts/${it.name}/slide1.jpg`;
 }
+function miniatura(it){ return `${RAW}/cloud/posts/${it.name}/thumb.jpg`; }
 function thumb(it){
+  if(it.arquivado){ const i=document.createElement("img"); i.loading="lazy"; i.src=miniatura(it); return i; }
   if(it.type==="reel"){
     const v=document.createElement("video");
     v.src=thumbSrc(it); v.muted=true; v.playsInline=true; v.preload="metadata";
+    v.onerror=()=>{ const i=document.createElement("img"); i.className=v.className; i.src=miniatura(it); v.replaceWith(i); };
     return v;
   }
-  const i=document.createElement("img"); i.loading="lazy"; i.src=thumbSrc(it); return i;
+  const i=document.createElement("img"); i.loading="lazy"; i.src=thumbSrc(it);
+  i.onerror=()=>{ i.onerror=null; i.src=miniatura(it); };
+  return i;
 }
 async function cap(name){
   if(CAPS[name]!==undefined) return CAPS[name];
