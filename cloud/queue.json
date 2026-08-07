@@ -76,5 +76,11 @@
         "type":  "reel",
         "when":  "2026-08-09 21:00",
         "status":  "pending"
+    },
+    {
+        "name":  "Reel-13---Feito-por-IA",
+        "type":  "reel",
+        "when":  "2026-08-10 19:00",
+        "status":  "pending"
     }
 ]
