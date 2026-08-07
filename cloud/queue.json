@@ -28,5 +28,11 @@
         "type":  "photo",
         "when":  "2026-08-07 12:00",
         "status":  "pending"
+    },
+    {
+        "name":  "Carrossel-09---Selic",
+        "type":  "carousel",
+        "when":  "2026-08-07 19:00",
+        "status":  "pending"
     }
 ]
