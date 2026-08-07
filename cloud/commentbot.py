@@ -16,6 +16,15 @@ TOKEN = os.environ["IG_TOKEN"]
 ROOT = os.path.dirname(os.path.abspath(__file__))
 STATE = os.path.join(ROOT, "bot_state.json")
 FLOWS = os.path.join(ROOT, "flows.json")
+LEADS = os.path.join(ROOT, "leads.csv")  # lead-crm: quem disparou fluxo (funil de venda)
+
+def log_lead(flow_id, c, respondido, dm_enviada):
+    novo = not os.path.exists(LEADS)
+    with open(LEADS, "a", encoding="utf-8") as f:
+        if novo:
+            f.write("data;fluxo;usuario;comentario;respondido;dm\n")
+        txt = (c.get("text", "") or "").replace(";", ",").replace("\n", " ")[:120]
+        f.write(f"{c.get('timestamp','')};{flow_id};{c.get('username','')};{txt};{int(respondido)};{int(dm_enviada)}\n")
 
 def norm(s):
     s = unicodedata.normalize("NFD", (s or "").lower())
@@ -75,14 +84,16 @@ def main():
                 if not match(f, c.get("text", "")): continue
                 print(f">>> fluxo '{f['id']}' disparado por @{c.get('username')}: {c.get('text','')[:60]}")
                 try:
+                    resp = dm_ok = False
                     if f.get("responder_comentario"):
                         post(f"{cid}/replies", {"message": f["responder_comentario"]})
-                        print("    respondido no comentario")
+                        print("    respondido no comentario"); resp = True
                     if f.get("dm"):
                         post(f"{IG}/messages", {
                             "recipient": json.dumps({"comment_id": cid}),
                             "message": json.dumps({"text": f["dm"]})})
-                        print("    DM (private reply) enviada")
+                        print("    DM (private reply) enviada"); dm_ok = True
+                    log_lead(f["id"], c, resp, dm_ok)
                     acted += 1
                 except Exception as e:
                     errs.append(f"fluxo {f['id']} em {cid}: {str(e)[:150]}")
