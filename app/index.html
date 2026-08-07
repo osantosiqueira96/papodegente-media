@@ -183,9 +183,12 @@ const NOTRIG={
 };
 function appTok(){return (localStorage.getItem("pg_pat")||"").replace(/[^\x21-\x7E]/g,"")}
 async function fire(id,btn){
-  const t=TRIG[id]; const tok=appTok();
+  const t=TRIG[id]; const tok=appTok(); const bot=BOTS[id];
   if(!tok){btn.textContent="configure o token na aba Flows (Configurar acesso)";return}
+  try{ if(window.Notification&&Notification.permission==="default")Notification.requestPermission(); }catch(e){}
   btn.disabled=true;btn.textContent="disparando...";
+  let baseId=null;
+  if(bot.wf){ try{ const rb=await gh(`${API}/actions/workflows/${bot.wf}/runs?per_page=1&t=${Date.now()}`).then(x=>x.json()); baseId=((rb.workflow_runs||[])[0]||{}).id||null; }catch(e){} }
   const hdr={Authorization:"Bearer "+tok,"Content-Type":"application/json"};
   try{
     const path=t.path||t.recommit;
@@ -199,8 +202,47 @@ async function fire(id,btn){
     if(sha)body.sha=sha;
     const r=await fetch(url,{method:"PUT",headers:hdr,body:JSON.stringify(body)});
     if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||("HTTP "+r.status))}
-    btn.textContent="\u2713 disparado! executa em ~1 min";
+    if(bot.wf){ btn.textContent="\u23F3 disparado \u2014 aguardando o rob\u00f4..."; watchRun(id,bot.wf,baseId,btn); }
+    else { btn.textContent="\u2713 disparado!"; btn.disabled=false; }
   }catch(e){btn.disabled=false;btn.textContent="erro: "+e.message.slice(0,40)}
+}
+
+
+function gh(u){const t=appTok();return fetch(u,t?{headers:{Authorization:"Bearer "+t}}:{})}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function notify(titulo,corpo){
+  try{ if(navigator.vibrate)navigator.vibrate([120,60,120]); }catch(e){}
+  try{ if(window.Notification&&Notification.permission==="granted"){new Notification(titulo,{body:corpo,icon:"icon-192.png"})} }catch(e){}
+}
+async function watchRun(id,wf,baseId,btn){
+  const t0=Date.now(); let runId=null;
+  for(let i=0;i<70;i++){
+    await sleep(6000);
+    try{
+      const r=await gh(`${API}/actions/workflows/${wf}/runs?per_page=1&t=${Date.now()}`).then(x=>x.json());
+      const run=(r.workflow_runs||[])[0];
+      if(!run) continue;
+      if(!runId){
+        if(baseId&&run.id===baseId){ btn.textContent="\u23F3 na fila do GitHub..."; continue; }
+        runId=run.id;
+      }
+      if(run.status!=="completed"){
+        btn.textContent=`\u25B6\uFE0F executando... ${Math.round((Date.now()-t0)/1000)}s`;
+        continue;
+      }
+      const ok=run.conclusion==="success";
+      const secs=Math.max(1,Math.round((new Date(run.updated_at)-new Date(run.run_started_at||run.created_at))/1000));
+      btn.textContent=(ok?"\u2713 CONCLU\u00cdDO":"\u2717 FALHOU")+` em ${secs}s \u2014 toque para ver o resultado`;
+      btn.style.background=ok?"var(--ok)":"var(--warn)";
+      btn.style.color=ok?"#0b2a16":"#fff";
+      btn.disabled=false;
+      btn.onclick=()=>botInfo(id);
+      notify(`${BOTS[id].n}: ${ok?"conclu\u00eddo \u2713":"falhou \u2717"}`, ok?`terminou em ${secs}s`:"veja o andon no e-mail");
+      return;
+    }catch(e){}
+  }
+  btn.textContent="\u231B demorou mais que o esperado \u2014 reabra a ficha";
+  btn.disabled=false;
 }
 
 async function botInfo(id){
@@ -210,7 +252,7 @@ async function botInfo(id){
   let h="";
   try{
     if(b.wf){
-      const r=await fetch(`${API}/actions/workflows/${b.wf}/runs?per_page=1`).then(x=>x.json());
+      const r=await gh(`${API}/actions/workflows/${b.wf}/runs?per_page=1&t=${Date.now()}`).then(x=>x.json());
       const run=(r.workflow_runs||[])[0];
       if(run){
         h+=row("Ultima execucao",fmtBR(run.created_at),"gold");
@@ -239,7 +281,7 @@ async function botInfo(id){
       h+=row("Obs","0 = modo dev esconde comentarios (falta testador/Live)");
     }
     if(b.extra==="pauta"){
-      const is=await fetch(`${API}/issues?state=all&per_page=10`).then(x=>x.json());
+      const is=await gh(`${API}/issues?state=all&per_page=10`).then(x=>x.json());
       const p=(is||[]).find(i=>i.title.startsWith("\u{1F5DE}"));
       if(p) h+=row("Ultima pauta",p.title,"ok");
     }
@@ -262,14 +304,14 @@ async function botInfo(id){
     if(b.static) h+=row("Estado",b.static);
   }catch(e){ h+=row("Erro",e.message,"bad"); }
   let fireHtml="";
-  if(TRIG[id]) fireHtml=`<button class="mfire" onclick="fire('${id}',this)">\u26A1 Disparar agora \u2014 ${TRIG[id].label}</button>`;
+  if(TRIG[id]) fireHtml=`<button class="mfire" style="background:var(--gold);color:#261442" onclick="fire('${id}',this)">\u26A1 Disparar agora \u2014 ${TRIG[id].label}</button>`;
   else if(NOTRIG[id]) fireHtml=`<div class="mnote">${NOTRIG[id]}</div>`;
   box.innerHTML=`<h3>\u{1F916} ${b.n}</h3><div class="desc">${b.d}</div>${h}${fireHtml}<button class="mclose" onclick="document.getElementById('mbg').classList.remove('on')">fechar</button>`;
 }
 
 async function diario(){
   try{
-    const is=await fetch(`${API}/issues?state=all&per_page=12&sort=created&direction=desc`).then(r=>r.json());
+    const is=await gh(`${API}/issues?state=all&per_page=12&sort=created&direction=desc`).then(r=>r.json());
     const vistos=new Set(); const picks=[];
     for(const i of is){
       const tipo=i.title.startsWith("🗞️")?"pauta":i.title.startsWith("📰")?"relatorio":i.title.startsWith("📈")?"analise":i.title.startsWith("🦫")?"roteiro":null;
