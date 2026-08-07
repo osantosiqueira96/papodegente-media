@@ -1,5 +1,7 @@
 name: IG Token Refresh
 on:
+  push:
+    paths: ['cloud/refresh_nudge.txt']
   schedule:
     - cron: '0 6 */14 * *'   # a cada 14 dias, 06:00 UTC
   workflow_dispatch:
