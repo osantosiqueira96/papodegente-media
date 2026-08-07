@@ -134,11 +134,11 @@ async function visao(){
     }
     h+=`</div>`;
     if(err.length){ h+=`<div class="card"><h2 style="color:var(--warn)">⚠️ Erros</h2>`+err.map(e=>`<div class="item"><span>${e.name}</span><span>${(e.note||"").slice(0,60)}</span></div>`).join("")+`</div>`; }
-    h+=`<div class="card"><h2>🤖 Frota (15 robôs) — toque para ver a última atividade</h2><div class="bots" id="bots">
+    h+=`<div class="card"><h2>🤖 Frota (17 robôs) — toque para ver a última atividade</h2><div class="bots" id="bots">
       <span class="on" data-b="publish">publish</span><span class="on" data-b="report">report 8h</span><span class="on" data-b="comment">comment-bot</span><span class="on" data-b="refresh">refresh</span>
       <span class="on" data-b="dashboard">dashboard 8h34</span><span class="on" data-b="planilha">planilha 8h50</span><span class="on" data-b="trend">trend 7h30</span><span class="on" data-b="factory">factory</span>
       <span class="on" data-b="nudger">nudger</span><span class="on" data-b="analyst">analyst 21h30</span><span class="on" data-b="story">story 17h30</span><span class="on" data-b="leadcrm">lead-crm</span>
-      <span class="on" data-b="pgbuilder">pg-builder</span><span data-b="threads">threads (chave)</span><span data-b="radar">radar (token FB)</span></div></div>`;
+      <span class="on" data-b="pgbuilder">pg-builder</span><span class="on" data-b="kaizen">kaizen 22h</span><span class="on" data-b="pcagent">pc-agent</span><span data-b="threads">threads (chave)</span><span data-b="radar">radar (token FB)</span></div></div>`;
     document.getElementById("visao").innerHTML=h;
   }catch(e){ document.getElementById("visao").innerHTML=`<div class="loading">erro ao carregar: ${e.message}</div>`; }
 }
@@ -158,6 +158,8 @@ const BOTS={
  planilha:{n:"rotina-planilha",d:"Atualiza a planilha de controle as 8h50 (ou ao ligar o PC)",hb:"planilha"},
  nudger:{n:"publish-nudger",d:"Cutuca o publicador se o GitHub atrasar (20/20min, PC ligado)",hb:"nudger"},
  pgbuilder:{n:"pg-builder",d:"Monta o reel do Professor PG a partir da inbox (30/30min, PC)",hb:"pg-builder"},
+ kaizen:{n:"agente-kaizen",d:"Ciclo kaizen 22h: evidencia vira registro (positiva/negativa/lean)",wf:"ig-kaizen.yml",extra:"kaizen"},
+ pcagent:{n:"pc-agent",d:"Ponte web->PC: executa os robos locais que voce dispara aqui",static:"roda no seu PC a cada 3 min (tarefa do Windows)"},
  threads:{n:"threads-mirror",d:"Espelha cada post no Threads",static:"DORMENTE - aguardando a chave secreta do Threads"}
 };
 const fmtBR=iso=>{try{return new Date(iso).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}catch(e){return iso}};
@@ -173,6 +175,7 @@ const TRIG={
  leadcrm:{recommit:"cloud/flows.json",wf:"ig-comment.yml",label:"varrer e registrar leads agora"},
  refresh:{path:"cloud/refresh_nudge.txt",label:"renovar o token agora"},
  factory:{path:"factory/nudge.txt",label:"processar as specs pendentes agora"},
+ kaizen:{path:"cloud/kaizen_nudge.txt",label:"rodar o ciclo kaizen agora"},
  radar:{path:"cloud/competitor_nudge.txt",label:"espiar os perfis do radar agora"},
  planilha:{local:"planilha",label:"atualizar a planilha agora"},
  nudger:{local:"nudger",label:"checar a fila e cutucar agora"},
@@ -261,7 +264,16 @@ async function watchRun(id,wf,baseId,btn){
       }
       const ok=run.conclusion==="success";
       const secs=Math.max(1,Math.round((new Date(run.updated_at)-new Date(run.run_started_at||run.created_at))/1000));
-      btn.textContent=(ok?"\u2713 CONCLU\u00cdDO":"\u2717 FALHOU")+` em ${secs}s \u2014 toque para ver o resultado`;
+      let extraMsg="";
+      if(id==="publish"&&ok){
+        try{
+          const q2=await fetch(`${RAW}/cloud/queue.json?t=${Date.now()}`).then(x=>x.json());
+          const dep=q2.filter(x=>x.status==="published").length;
+          const dif=dep-(window.__pubAntes||dep);
+          extraMsg=dif>0?` \u2014 ${dif} post(s) publicado(s)!`:" \u2014 nada estava vencido (fila em dia)";
+        }catch(e){}
+      }
+      btn.textContent=(ok?"\u2713 CONCLU\u00cdDO":"\u2717 FALHOU")+` em ${secs}s`+(extraMsg||" \u2014 toque para ver o resultado");
       btn.style.background=ok?"var(--ok)":"var(--warn)";
       btn.style.color=ok?"#0b2a16":"#fff";
       btn.disabled=false;
@@ -298,7 +310,18 @@ async function botInfo(id){
       const q=await fetch(`${RAW}/cloud/queue.json?t=${Date.now()}`).then(x=>x.json());
       const pubs=q.filter(x=>x.status==="published"&&x.published_at).sort((a,b)=>b.published_at.localeCompare(a.published_at));
       if(pubs[0]) h+=row("Ultimo post publicado",`${pubs[0].name.replace(/-/g," ")}<br>as ${pubs[0].published_at.slice(11)}`,"ok");
+      const pend=q.filter(x=>x.status==="pending").sort((a,b)=>a.when.localeCompare(b.when));
+      const agora=new Date(); const venc=pend.filter(x=>new Date(x.when.replace(" ","T"))<=agora);
+      h+=row("Vencidos agora",venc.length?`${venc.length} \u2014 disparar publica`:"nenhum",venc.length?"gold":"");
+      if(pend[0]) h+=row("Proximo post",`${pend[0].name.replace(/-/g," ")}<br>${pend[0].when.slice(5,16)}`,"");
+      window.__pubAntes=q.filter(x=>x.status==="published").length;
       const err=q.filter(x=>x.status==="error"); if(err.length) h+=row("Erros na fila",err.length,"bad");
+    }
+    if(b.extra==="kaizen"){
+      const kz=await fetch(`${RAW}/cloud/kaizen.json?t=${Date.now()}`).then(x=>x.ok?x.json():{entradas:[]});
+      const ent=kz.entradas||[]; const abertas=ent.filter(e=>e.status==="Aberta");
+      h+=row("Registros no ciclo",ent.length,"gold")+row("Impedimentos abertos",abertas.length,abertas.length?"bad":"ok");
+      if(ent.length) h+=row("Ultimo registro",ent[ent.length-1].titulo,"ok");
     }
     if(b.extra==="metrics"){
       const m=await fetch(`${RAW}/cloud/metrics.json?t=${Date.now()}`).then(x=>x.json());
