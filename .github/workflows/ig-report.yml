@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 jobs:
@@ -22,6 +22,18 @@ jobs:
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_TOKEN: ${{ secrets.IG_TOKEN }}
+      - name: Commit metrics.json (fonte do dashboard)
+        run: |
+          git config user.name "ig-bot"
+          git config user.email "ig-bot@users.noreply.github.com"
+          git add cloud/metrics.json
+          if git diff --cached --quiet; then echo "sem mudanças"; exit 0; fi
+          git commit -m "metrics: snapshot diário [skip ci]"
+          for i in 1 2 3; do
+            git pull --rebase origin ${{ github.ref_name }} && git push && exit 0
+            sleep 4
+          done
+          exit 1
       - name: Abrir issue com o relatório (-> e-mail)
         env:
           GH_TOKEN: ${{ github.token }}
