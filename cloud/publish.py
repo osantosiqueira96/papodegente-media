@@ -147,6 +147,26 @@ def checar_cota():
         print("nao consegui ler a cota:", str(e)[:120])
         return 0, 100
 
+def _assinatura(txt):
+    """Primeiras palavras da legenda, normalizadas — serve de impressao digital do post."""
+    t = " ".join((txt or "").split())
+    return t[:60].lower()
+
+def ja_no_perfil(folder):
+    """Procura no perfil um post com a mesma legenda (ultimos 10). Devolve o id se achar.
+    TRAVA ANTI-DUPLICATA: usada antes de publicar e tambem quando a resposta da Meta falha
+    (o post pode ter ido ao ar mesmo com erro na resposta)."""
+    alvo = _assinatura(caption_of(folder))
+    if not alvo:
+        return None
+    try:
+        for m in api_get(f"{IG}/media", {"fields": "id,caption", "limit": 10}).get("data", []):
+            if _assinatura(m.get("caption")) == alvo:
+                return m["id"]
+    except Exception as e:
+        print("    (nao consegui conferir o perfil:", str(e)[:80], ")")
+    return None
+
 def main():
     if not os.path.exists(QUEUE):
         print("sem queue.json — nada a fazer")
@@ -167,6 +187,16 @@ def main():
             continue
         name, typ = item["name"], item.get("type", "carousel")
         print(f">>> publicando {name} ({typ}) agendado {item['when']}")
+        # TRAVA 1: ja esta no perfil? entao nao republica (idempotencia)
+        dup = ja_no_perfil(name)
+        if dup:
+            item["status"] = "published"
+            item["post_id"] = dup
+            item["published_at"] = item.get("published_at") or now.strftime("%Y-%m-%d %H:%M")
+            item["note"] = "ja estava no perfil — publicacao evitada pela trava anti-duplicata"
+            print(f"    JA PUBLICADO (id={dup}) — pulando para nao duplicar")
+            changed = True
+            continue
         try:
             fn = {"carousel": publish_carousel, "photo": publish_photo, "reel": publish_reel}[typ]
             post_id = fn(name)
@@ -179,18 +209,30 @@ def main():
                 item["threads_id"] = tid
         except Exception as e:
             msg = str(e)
-            # limite de requisicao da Meta = TEMPORARIO: segura na fila e tenta de novo
-            transitorio = ("request limit" in msg or '"code":4' in msg or "2207051" in msg
-                           or "rate limit" in msg.lower() or '"code":32' in msg)
-            if transitorio:
-                item["status"] = "pending"
-                item["note"] = f"limite temporario da Meta em {now.strftime('%H:%M')} — nova tentativa no proximo ciclo"
-                print(f"    LIMITE DA META (temporario): fica na fila e tenta de novo")
+            # TRAVA 2: erro na resposta NAO significa que o post nao saiu.
+            # Confere o perfil antes de decidir (foi assim que nasceram 36 duplicatas em 07/08).
+            saiu = ja_no_perfil(name)
+            if saiu:
+                item["status"] = "published"
+                item["post_id"] = saiu
+                item["published_at"] = now.strftime("%Y-%m-%d %H:%M")
+                item["note"] = "resposta da Meta falhou, mas o post foi confirmado no perfil"
+                print(f"    erro na resposta, MAS o post esta no perfil (id={saiu}) — marcado publicado")
             else:
-                item["status"] = "error"
-                item["note"] = msg[:200]
-                errs.append(f"{name} ({item['when']}): {msg[:160]}")
-                print(f"    ERRO: {e}")
+                item["tentativas"] = int(item.get("tentativas", 0)) + 1
+                transitorio = ("request limit" in msg or '"code":4' in msg or "2207051" in msg
+                               or "rate limit" in msg.lower() or '"code":32' in msg)
+                # TRAVA 3: no maximo 2 tentativas — nunca mais um loop infinito
+                if transitorio and item["tentativas"] < 2:
+                    item["status"] = "pending"
+                    item["note"] = (f"limite temporario da Meta em {now.strftime('%H:%M')} — "
+                                    f"tentativa {item['tentativas']}/2")
+                    print(f"    limite temporario: tentativa {item['tentativas']}/2")
+                else:
+                    item["status"] = "error"
+                    item["note"] = f"[{item['tentativas']} tentativa(s)] " + msg[:180]
+                    errs.append(f"{name} ({item['when']}): {msg[:160]}")
+                    print(f"    ERRO definitivo apos {item['tentativas']} tentativa(s): {e}")
         changed = True
     if changed:
         json.dump(q, open(QUEUE, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
