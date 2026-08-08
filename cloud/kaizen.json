@@ -26,12 +26,32 @@
    "evidencia": "Alcance medio: reels 39.4 vs demais 1.1 (35.8x).",
    "acao": "Manter reels como formato principal da esteira.",
    "status": "OK"
+  },
+  {
+   "id": "neg-falha-ig-publish.yml-2026-08-08",
+   "data": "2026-08-08",
+   "tipo": "negativa",
+   "titulo": "ig-publish falhou e NAO se recuperou",
+   "evidencia": "1 falha(s) nas ultimas 24h; ultima execucao: failure.",
+   "acao": "Investigar o log da run 31239782633 e corrigir a causa raiz.",
+   "status": "Aberta"
+  },
+  {
+   "id": "lean-nudger-2026-08-08",
+   "data": "2026-08-08",
+   "tipo": "lean",
+   "titulo": "Espera: o agendador do GitHub atrasou a publicacao",
+   "evidencia": "O nudger precisou intervir hoje (cutucou o publicador: 1 post(s) vencido(s)).",
+   "acao": "Nudger no PC (20/20min) + botao de disparo no app ja cobrem. Se repetir muito, encurtar o cron.",
+   "status": "Em execucao"
   }
  ],
  "ids": [
   "lean-nudger-2026-08-07",
+  "lean-nudger-2026-08-08",
+  "neg-falha-ig-publish.yml-2026-08-08",
   "pos-recorde-140",
   "pos-reelsfirst-2026-08-07"
  ],
- "atualizado": "2026-08-07 18:42"
+ "atualizado": "2026-08-08 01:37"
 }
